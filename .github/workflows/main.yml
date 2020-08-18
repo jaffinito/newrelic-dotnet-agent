@@ -1,0 +1,42 @@
+name: .NET Agent Pull Request Builder
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+
+  build-test:
+
+    runs-on: windows-2019
+
+    env:
+      Solution_Path: $Env:GITHUB_WORKSPACE\FullAgent.sln
+      Nuget_Path:  $Env:GITHUB_WORKSPACE\build\Tools\nuget.exe
+      DOTNET_NOLOGO: true
+      #<other env vars here>
+
+    steps:
+    - uses: actions/checkout@v2
+
+    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.1
+    
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.x
+
+    - name: Install dependencies
+      run: $Env:Nuget_Path $Env:Solution_Path
+
+    - name: Build
+      run: MSBuild.exe -m -p:Configuration=Release;AllowUnsafeBlocks=true $Env:Solution_Path
+      shell: powershell
+
+    - name: Test
+      run: Write-Host Hi
+      shell: powershell
