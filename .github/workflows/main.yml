@@ -31,10 +31,12 @@ jobs:
         dotnet-version: 3.1.x
 
     - name: Install dependencies
-      run: ${{ env.nuget_path }} ${{ env.solution_path }}
+      run: |
+        Write-Host ${{ env.nuget_path }} restore ${{ env.solution_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
+        ${{ env.nuget_path }} restore ${{ env.solution_path }} -NoCache -Source "https://www.nuget.org/api/v2"
 
     - name: Build
-      run: MSBuild.exe -m -p:Configuration=Release;AllowUnsafeBlocks=true $Env:Solution_Path
+      run: Write-Host "MSBuild.exe -m -p:Configuration=Release;AllowUnsafeBlocks=true ${{ env.solution_path }}"
       shell: powershell
 
     - name: Test
