@@ -42,8 +42,8 @@ jobs:
 
     - name: Build
       run: |
-        Write-Host "MSBuild.exe -m -p:Configuration=Release;AllowUnsafeBlocks=true ${{ env.solution_path }}"
-        MSBuild.exe -m -p:Configuration=Release;AllowUnsafeBlocks=true ${{ env.solution_path }}
+        Write-Host "MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.solution_path }}"
+        MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.solution_path }}
       shell: powershell
 
     - name: Unit Tests
