@@ -21,7 +21,8 @@ jobs:
       #<other env vars here>
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
       with:
         fetch-depth: 0
 
@@ -45,6 +46,12 @@ jobs:
         Write-Host "MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.solution_path }}"
         MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.solution_path }}
       shell: powershell
+
+    - name: Archive the artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: my-artifact-${{ github.run_id }}
+        path: ${{ env.solution_path }}
 
     - name: Unit Tests
       run: |
