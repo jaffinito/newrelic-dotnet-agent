@@ -14,7 +14,9 @@ jobs:
 
     env:
       solution_path: ${{ github.workspace }}\FullAgent.sln
-      nuget_path:  ${{ github.workspace }}\build\Tools\nuget.exe
+      scripts_path: ${{ github.workspace }}\build\scripts
+      tools_path: ${{ github.workspace }}\build\Tools
+      
       DOTNET_NOLOGO: true
       #<other env vars here>
 
@@ -32,13 +34,18 @@ jobs:
 
     - name: Install dependencies
       run: |
-        Write-Host ${{ env.nuget_path }} restore ${{ env.solution_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
-        ${{ env.nuget_path }} restore ${{ env.solution_path }} -NoCache -Source "https://www.nuget.org/api/v2"
-
-    - name: Build
-      run: Write-Host "MSBuild.exe -m -p:Configuration=Release;AllowUnsafeBlocks=true ${{ env.solution_path }}"
+        Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.solution_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
+        ${{ env.tools_path }}\nuget.exe restore ${{ env.solution_path }} -NoCache -Source "https://www.nuget.org/api/v2"
       shell: powershell
 
-    - name: Test
-      run: Write-Host hello
+    - name: Build
+      run: |
+        Write-Host "MSBuild.exe -m -p:Configuration=Release;AllowUnsafeBlocks=true ${{ env.solution_path }}"
+        MSBuild.exe -m -p:Configuration=Release;AllowUnsafeBlocks=true ${{ env.solution_path }}
+      shell: powershell
+
+    - name: Unit Tests
+      run: |
+        Write-Host ${{ scripts_path }}\DotNet-Agent-CI-UnitTests.ps1
+        ${{ scripts_path }}\DotNet-Agent-CI-UnitTests.ps1
       shell: powershell
