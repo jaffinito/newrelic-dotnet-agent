@@ -30,13 +30,17 @@ jobs:
       with:
         dotnet-version: 3.1.x
 
+    - name: whereami
+      run: Write-Host ${{ githib.workspace }}
+      shell: powershell
+
     - name: Install dependencies
-      run: $Env:Nuget_Path $Env:Solution_Path
+      run: Write-Host $Env:Nuget_Path $Env:Solution_Path
 
     - name: Build
-      run: MSBuild.exe -m -p:Configuration=Release;AllowUnsafeBlocks=true $Env:Solution_Path
+      run: Write-Host MSBuild.exe -m -p:Configuration=Release;AllowUnsafeBlocks=true $Env:Solution_Path
       shell: powershell
 
     - name: Test
-      run: Write-Host Hi
+      run: sdWrite-Host hello
       shell: powershell
