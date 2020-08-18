@@ -46,6 +46,6 @@ jobs:
 
     - name: Unit Tests
       run: |
-        Write-Host ${{ scripts_path }}\DotNet-Agent-CI-UnitTests.ps1
-        ${{ scripts_path }}\DotNet-Agent-CI-UnitTests.ps1
+        Write-Host ${{ env.scripts_path }}\DotNet-Agent-CI-UnitTests.ps1
+        ${{ env.scripts_path }}\DotNet-Agent-CI-UnitTests.ps1
       shell: powershell
