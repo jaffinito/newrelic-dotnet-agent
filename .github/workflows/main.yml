@@ -13,8 +13,8 @@ jobs:
     runs-on: windows-2019
 
     env:
-      Solution_Path: ${{ github.workspace }}\FullAgent.sln
-      Nuget_Path:  ${{ github.workspace }}\build\Tools\nuget.exe
+      solution_path: ${{ github.workspace }}\FullAgent.sln
+      nuget_path:  ${{ github.workspace }}\build\Tools\nuget.exe
       DOTNET_NOLOGO: true
       #<other env vars here>
 
@@ -30,17 +30,13 @@ jobs:
       with:
         dotnet-version: 3.1.x
 
-    - name: whereami
-      run: Write-Host ${{ env.Solution_Path }}
-      shell: powershell
-
     - name: Install dependencies
-      run: Write-Host $Env:Nuget_Path $Env:Solution_Path
+      run: $${{ env.nuget_path }} ${{ env.solution_path }}
 
     - name: Build
-      run: Write-Host MSBuild.exe -m -p:Configuration=Release;AllowUnsafeBlocks=true $Env:Solution_Path
+      run: MSBuild.exe -m -p:Configuration=Release;AllowUnsafeBlocks=true $Env:Solution_Path
       shell: powershell
 
     - name: Test
-      run: sdWrite-Host hello
+      run: Write-Host hello
       shell: powershell
