@@ -31,7 +31,7 @@ jobs:
         dotnet-version: 3.1.x
 
     - name: Install dependencies
-      run: $${{ env.nuget_path }} ${{ env.solution_path }}
+      run: ${{ env.nuget_path }} ${{ env.solution_path }}
 
     - name: Build
       run: MSBuild.exe -m -p:Configuration=Release;AllowUnsafeBlocks=true $Env:Solution_Path
