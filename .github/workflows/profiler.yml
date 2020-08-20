@@ -1,0 +1,50 @@
+name: .NET Agent Profiler Builder
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+
+  build-test:
+
+    runs-on: windows-2019
+
+    env:
+      scripts_path: ${{ github.workspace }}\build\scripts
+      tools_path: ${{ github.workspace }}\build\Tools
+      profiler_path: ${{ github.workspace }}\src\Agent\NewRelic\Profiler
+      profiler_solution_path: ${{ env.profiler_path }}\NewRelic.Profiler.sln
+      output_path: ${{ github.workspace }}\src\Agent\_profilerBuild
+      DOTNET_NOLOGO: true
+      #<other env vars here>
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.1
+
+    - name: Install dependencies
+      run: |
+        Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.profiler_solution_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
+        ${{ env.tools_path }}\nuget.exe restore ${{ env.profiler_solution_path }} -NoCache -Source "https://www.nuget.org/api/v2"
+      shell: powershell
+
+    - name: Build x64
+      run: |
+        Write-Host "MSBuild.exe -m -p:Platform=x64 -p:Configuration=Release ${{ env.solution_path }}"
+        MSBuild.exe -m -p:Platform=x64 -p:Configuration=Release ${{ env.solution_path }}
+      shell: powershell
+      
+    - name: Build x86
+      run: |
+        Write-Host "MSBuild.exe -m -p:Platform=Win32 -p:Configuration=Release ${{ env.solution_path }}"
+        MSBuild.exe -m -p:Platform=Win32 -p:Configuration=Release ${{ env.solution_path }}
+      shell: powershell
+    
