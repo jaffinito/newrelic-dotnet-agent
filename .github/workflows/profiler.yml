@@ -16,7 +16,7 @@ jobs:
       scripts_path: ${{ github.workspace }}\build\scripts
       tools_path: ${{ github.workspace }}\build\Tools
       profiler_path: ${{ github.workspace }}\src\Agent\NewRelic\Profiler
-      profiler_solution_path: ${{ env.profiler_path }}\NewRelic.Profiler.sln
+      profiler_solution_path: ${{ github.workspace }}\src\Agent\NewRelic\Profiler\NewRelic.Profiler.sln
       output_path: ${{ github.workspace }}\src\Agent\_profilerBuild
       DOTNET_NOLOGO: true
       #<other env vars here>
