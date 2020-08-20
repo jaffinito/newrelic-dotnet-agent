@@ -38,13 +38,13 @@ jobs:
 
     - name: Build x64
       run: |
-        Write-Host "MSBuild.exe -m -p:Platform=x64 -p:Configuration=Release ${{ env.solution_path }}"
-        MSBuild.exe -m -p:Platform=x64 -p:Configuration=Release ${{ env.solution_path }}
+        Write-Host "MSBuild.exe -m -p:Platform=x64 -p:Configuration=Release ${{ env.profiler_solution_path }}"
+        MSBuild.exe -m -p:Platform=x64 -p:Configuration=Release ${{ env.profiler_solution_path }}
       shell: powershell
       
     - name: Build x86
       run: |
-        Write-Host "MSBuild.exe -m -p:Platform=Win32 -p:Configuration=Release ${{ env.solution_path }}"
-        MSBuild.exe -m -p:Platform=Win32 -p:Configuration=Release ${{ env.solution_path }}
+        Write-Host "MSBuild.exe -m -p:Platform=Win32 -p:Configuration=Release ${{ env.profiler_solution_path }}"
+        MSBuild.exe -m -p:Platform=Win32 -p:Configuration=Release ${{ env.profiler_solution_path }}
       shell: powershell
     
