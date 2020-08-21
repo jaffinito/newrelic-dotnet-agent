@@ -82,7 +82,7 @@ jobs:
 
       # This step will only run on a push to master aka Merge from a PR.
     - name: Publish to MyGet
-      if: if: ${{ github.event_name == 'push' }}
+      if: ${{ github.event_name == 'push' }}
       run: |
         foreach ($file in Get-ChildItem -Path "${{ artifact_staging_path }}\") {
           nuget push $file.name -Source https://www.myget.org/F/newrelic/api/v3/index.json }
