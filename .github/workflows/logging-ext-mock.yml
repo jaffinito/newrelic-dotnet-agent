@@ -24,28 +24,19 @@ jobs:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.1
     
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1.200
+    - name: Setup Artifacts Staging
+      run: New-Item -Path "${{ github.workspace }}" -Name "artifactstaging" -ItemType Directory
+      shell: powershell
 
     - name: Setup Artifact Staging
       run: New-Item -Path "${{ github.workspace }}" -Name "artifactstaging" -ItemType "directory"
       shell: powershell
 
-    - name: Install SonarScanner
-      run: dotnet tool install --global dotnet-sonarscanner --version 4.10.0
-      shell: powershell
-
-      - name: Setup Nuget
-        uses: nuget/setup-nuget@v1
-        with:
-          nuget-api-key: ${{ secrets.NuGetAPIKey }}
-          nuget-version: '5.x'
-
-    - name: SonarScanner Begin
-      run: dotnet-sonarscanner begin /k:"project-key" /o:"<organization>" /d:sonar.login="<token>"
-      shell: powershell
+    - name: Setup Nuget with API Key and Add to Path
+      uses: nuget/setup-nuget@v1
+      with:
+        nuget-api-key: ${{ secrets.NuGetAPIKey }}
+        nuget-version: '5.x'
 
     - name: Build
       run:  dotnet build NewRelic.LogEnrichers.sln --configuration Release
@@ -62,11 +53,7 @@ jobs:
     - name: Test Log4Net
       run:  dotnet test src/Log4Net/NewRelic.LogEnrichers.Log4Net.Tests --no-build --no-restore --configuration Release --logger trx
       shell: powershell
-
-    - name: SonarScanner End
-      run: dotnet-sonarscanner end /d:sonar.login="<token>"
-      shell: powershell
-      
+     
     - name: Archive the artifacts
       uses: actions/upload-artifact@v2
       with:
@@ -74,16 +61,25 @@ jobs:
         path: ${{ env.solution_path }}
 
     - name: Copy Serilog Build Artifacts to Staging Location
-      run: 
+      run:  |
+        Copy-Item -Path "${{ github.workspace }}\src\Serilog\NewRelic.LogEnrichers.Serilog\bin\Release" -Include "*.nupkg" -Destination "${{ artifact_staging_path }}\"
+        Copy-Item -Path "${{ github.workspace }}\src\Serilog\NewRelic.LogEnrichers.Serilog\bin\Release\*" -Include "*.snupkg" -Destination "${{ artifact_staging_path }}\"
       shell: powershell
 
     - name: Copy NLog Build Artifacts to Staging Location
-      run: 
+      run:  |
+        Copy-Item -Path "${{ github.workspace }}\src\\NLog\NewRelic.LogEnrichers.NLog\bin\Release" -Include "*.nupkg" -Destination "${{ artifact_staging_path }}\"
+        Copy-Item -Path "${{ github.workspace }}\src\\NLog\NewRelic.LogEnrichers.NLog\bin\Release\*" -Include "*.snupkg" -Destination "${{ artifact_staging_path }}\"
       shell: powershell
 
     - name: Copy Log4Net Build Artifacts to Staging Location
-      run: 
+      run:  |
+        Copy-Item -Path "${{ github.workspace }}\src\Copying D:\a\1\s\src\Log4Net\NewRelic.LogEnrichers.Log4Net\bin\Release" -Include "*.nupkg" -Destination "${{ artifact_staging_path }}\"
+        Copy-Item -Path "${{ github.workspace }}\src\Copying D:\a\1\s\src\Log4Net\NewRelic.LogEnrichers.Log4Net\bin\Release\*" -Include "*.snupkg" -Destination "${{ artifact_staging_path }}\"
       shell: powershell
 
     - name: Publish to MyGet
-      run: nuget push stuf and things
+      run: |
+        foreach ($file in Get-ChildItem -Path "${{ artifact_staging_path }}\") {
+          nuget push $file.name -Source https://www.myget.org/F/newrelic/api/v3/index.json }
+      shell: powershell
