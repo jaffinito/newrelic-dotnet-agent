@@ -2,7 +2,7 @@ name: .NET Agent Pull Request Builder
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ main,net35/main ]
   push:
     branches: [ main ]
   workflow_dispatch:
