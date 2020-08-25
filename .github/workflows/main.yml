@@ -16,12 +16,13 @@ env:
 jobs:
 
   build-test-fullagent-msi:
+    name: Build and Test FullAgent and MSIInstaller
 
     runs-on: windows-2019
 
     env:
       fullagent_soluition_path: ${{ github.workspace }}\FullAgent.sln
-      msi_soluition_path: ${{ github.workspace }}\src\Agent\MsiInstaller\MsiInstaller.sln.sln
+      msi_soluition_path: ${{ github.workspace }}\src\Agent\MsiInstaller\MsiInstaller.sln
 
     steps:
     - name: Checkout
@@ -50,10 +51,16 @@ jobs:
         MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.fullagent_soluition_path }}
       shell: powershell
 
-    - name: Build MsiInstaller.sln
+    - name: Build MsiInstaller.sln x86
       run: |
-        Write-Host "MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.msi_soluition_path }}"
-        MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.msi_soluition_path }}
+        Write-Host "MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true -p:Platform=x86 ${{ env.msi_soluition_path }}"
+        MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true -p:Platform=x86 ${{ env.msi_soluition_path }}
+      shell: powershell
+
+    - name: Build MsiInstaller.sln x64
+      run: |
+        Write-Host "MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true -p:Platform=x64 ${{ env.msi_soluition_path }}"
+        MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true -p:Platform=x64 ${{ env.msi_soluition_path }}
       shell: powershell
 
     - name: Unit Tests
@@ -69,6 +76,7 @@ jobs:
         path: ${{ github.workspace }}\TestResults
 
   build-integration-tests:
+    name: Build IntegrationTests
 
     runs-on: windows-2019
 
@@ -92,11 +100,12 @@ jobs:
 
     - name: Build IntegrationTests.sln
       run: |
-        Write-Host "MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.integration_soluition_path }}"
-        MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.integration_soluition_path }}
+        Write-Host "MSBuild.exe -m -p:Configuration=Release -p:DeployOnBuild=true -p:PublishProfile=LocalDeploy ${{ env.integration_soluition_path }}"
+        MSBuild.exe -m -p:Configuration=Release -p:DeployOnBuild=true -p:PublishProfile=LocalDeploy ${{ env.integration_soluition_path }}
       shell: powershell
 
   build-unbounded-tests:
+    name: Build UnboundedIntegrationTests
 
     runs-on: windows-2019
 
@@ -120,11 +129,12 @@ jobs:
 
     - name: Build UnboundedIntegrationTests.sln
       run: |
-        Write-Host "MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.unbounded_soluition_path }}"
-        MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.unbounded_soluition_path }}
+        Write-Host "MSBuild.exe -m -p:Configuration=Release -p:DeployOnBuild=true -p:PublishProfile=LocalDeploy ${{ env.unbounded_soluition_path }}"
+        MSBuild.exe -m -p:Configuration=Release -p:DeployOnBuild=true -p:PublishProfile=LocalDeploy ${{ env.unbounded_soluition_path }}
       shell: powershell
 
   build-platform-tests: 
+    name: Build PlatformTests
 
     runs-on: windows-2019
 
@@ -139,7 +149,7 @@ jobs:
 
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.1
-      
+
     - name: Install dependencies for PlatformTests.sln
       run: |
         Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.platform_soluition_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
@@ -148,6 +158,6 @@ jobs:
 
     - name: Build PlatformTests.sln
       run: |
-        Write-Host "MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.platform_soluition_path }}"
-        MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.platform_soluition_path }}
+        Write-Host "MSBuild.exe -m -p:Configuration=Release ${{ env.platform_soluition_path }}"
+        MSBuild.exe -m -p:Configuration=Release ${{ env.platform_soluition_path }}
       shell: powershell  
