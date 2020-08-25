@@ -32,11 +32,6 @@ jobs:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.1
     
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1.200
-
     - name: Install dependencies for FullAgent.sln
       run: |
         Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.fullagent_soluition_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
@@ -81,6 +76,14 @@ jobs:
       integration_soluition_path: ${{ github.workspace }}\tests\Agent\IntegrationTests\IntegrationTests.sln
 
     steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.1
+
     - name: Install dependencies for IntegrationTests.sln
       run: |
         Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.integration_soluition_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
@@ -101,6 +104,14 @@ jobs:
       unbounded_soluition_path: ${{ github.workspace }}\tests\Agent\IntegrationTests\UnboundedIntegrationTests.sln
 
     steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.1
+
     - name: Install dependencies for UnboundedIntegrationTests.sln
       run: |
         Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.unbounded_soluition_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
@@ -121,6 +132,14 @@ jobs:
       platform_soluition_path: ${{ github.workspace }}\tests\Agent\PlatformTests\PlatformTests.sln
 
     steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.1
+      
     - name: Install dependencies for PlatformTests.sln
       run: |
         Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.platform_soluition_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
