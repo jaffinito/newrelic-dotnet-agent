@@ -7,19 +7,21 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+env:
+  scripts_path: ${{ github.workspace }}\build\scripts
+  tools_path: ${{ github.workspace }}\build\Tools
+  DOTNET_NOLOGO: true
+  #<other env vars here>
+
 jobs:
 
-  build-test:
+  build-test-fullagent-msi:
 
     runs-on: windows-2019
 
     env:
-      solution_path: ${{ github.workspace }}\FullAgent.sln
-      scripts_path: ${{ github.workspace }}\build\scripts
-      tools_path: ${{ github.workspace }}\build\Tools
-      
-      DOTNET_NOLOGO: true
-      #<other env vars here>
+      fullagent_soluition_path: ${{ github.workspace }}\FullAgent.sln
+      msi_soluition_path: ${{ github.workspace }}\src\Agent\MsiInstaller\MsiInstaller.sln.sln
 
     steps:
     - name: Checkout
@@ -27,7 +29,6 @@ jobs:
       with:
         fetch-depth: 0
 
-    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.1
     
@@ -36,26 +37,98 @@ jobs:
       with:
         dotnet-version: 3.1.200
 
-    - name: Install dependencies
+    - name: Install dependencies for FullAgent.sln
       run: |
-        Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.solution_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
-        ${{ env.tools_path }}\nuget.exe restore ${{ env.solution_path }} -NoCache -Source "https://www.nuget.org/api/v2"
+        Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.fullagent_soluition_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
+        ${{ env.tools_path }}\nuget.exe restore ${{ env.fullagent_soluition_path }} -NoCache -Source "https://www.nuget.org/api/v2"
       shell: powershell
 
-    - name: Build
+    - name: Install dependencies for MsiInstaller.sln
       run: |
-        Write-Host "MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.solution_path }}"
-        MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.solution_path }}
+        Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.msi_soluition_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
+        ${{ env.tools_path }}\nuget.exe restore ${{ env.msi_soluition_path }} -NoCache -Source "https://www.nuget.org/api/v2"
+      shell: powershell
+    
+    - name: Build FullAgent.sln
+      run: |
+        Write-Host "MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.fullagent_soluition_path }}"
+        MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.fullagent_soluition_path }}
       shell: powershell
 
-    - name: Archive the artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: my-artifact-${{ github.run_id }}
-        path: ${{ env.solution_path }}
+    - name: Build MsiInstaller.sln
+      run: |
+        Write-Host "MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.msi_soluition_path }}"
+        MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.msi_soluition_path }}
+      shell: powershell
 
     - name: Unit Tests
       run: |
         Write-Host ${{ env.scripts_path }}\DotNet-Agent-CI-UnitTests.ps1
         ${{ env.scripts_path }}\DotNet-Agent-CI-UnitTests.ps1
       shell: powershell
+
+    - name: Archive the artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: my-artifact-${{ github.run_id }}
+        path: ${{ github.workspace }}\TestResults
+
+  build-integration-tests:
+
+    runs-on: windows-2019
+
+    env:
+      integration_soluition_path: ${{ github.workspace }}\tests\Agent\IntegrationTests\IntegrationTests.sln
+
+    steps:
+    - name: Install dependencies for IntegrationTests.sln
+      run: |
+        Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.integration_soluition_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
+        ${{ env.tools_path }}\nuget.exe restore ${{ env.integration_soluition_path }} -NoCache -Source "https://www.nuget.org/api/v2"
+      shell: powershell
+
+    - name: Build IntegrationTests.sln
+      run: |
+        Write-Host "MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.integration_soluition_path }}"
+        MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.integration_soluition_path }}
+      shell: powershell
+
+  build-unbounded-tests:
+
+    runs-on: windows-2019
+
+    env:
+      unbounded_soluition_path: ${{ github.workspace }}\tests\Agent\IntegrationTests\UnboundedIntegrationTests.sln
+
+    steps:
+    - name: Install dependencies for UnboundedIntegrationTests.sln
+      run: |
+        Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.unbounded_soluition_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
+        ${{ env.tools_path }}\nuget.exe restore ${{ env.unbounded_soluition_path }} -NoCache -Source "https://www.nuget.org/api/v2"
+      shell: powershell
+
+    - name: Build UnboundedIntegrationTests.sln
+      run: |
+        Write-Host "MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.unbounded_soluition_path }}"
+        MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.unbounded_soluition_path }}
+      shell: powershell
+
+  build-platform-tests: 
+
+    runs-on: windows-2019
+
+    env:
+      platform_soluition_path: ${{ github.workspace }}\tests\Agent\PlatformTests\PlatformTests.sln
+
+    steps:
+    - name: Install dependencies for PlatformTests.sln
+      run: |
+        Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.platform_soluition_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
+        ${{ env.tools_path }}\nuget.exe restore ${{ env.platform_soluition_path }} -NoCache -Source "https://www.nuget.org/api/v2"
+      shell: powershell
+
+    - name: Build PlatformTests.sln
+      run: |
+        Write-Host "MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.platform_soluition_path }}"
+        MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.platform_soluition_path }}
+      shell: powershell  
