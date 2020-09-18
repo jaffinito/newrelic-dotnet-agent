@@ -72,10 +72,10 @@ jobs:
 
     - name: Unit Tests
       run: |
-        Write-Host ${{ env.scripts_path }}\DotNet-Agent-CI-UnitTests.ps1
-        ${{ env.scripts_path }}\DotNet-Agent-CI-UnitTests.ps1
+        # Write-Host ${{ env.scripts_path }}\DotNet-Agent-CI-UnitTests.ps1
+        # ${{ env.scripts_path }}\DotNet-Agent-CI-UnitTests.ps1
         Write-Host "Creating TestResults directory to temporarily get around nunit limitation"
-        mkdir TestResults
+        mkdir ${{ github.workspace }}\TestResults
 
         $testDllPatterns = @('*Tests.dll', '*Test.dll', '*Test.Legacy.dll')
 
