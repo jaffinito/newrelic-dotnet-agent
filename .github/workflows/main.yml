@@ -94,7 +94,8 @@ jobs:
 
         Write-Host "Executing Framework NUnit Tests:"
         $frameworkUnitTestPaths | ForEach-Object { $_ }
-        & 'vstest.console.exe  ' $frameworkUnitTestPaths '/Parallel /Logger:trx'
+        Write.Host "& 'vstest.console.exe  ' $frameworkUnitTestPaths '--Parallel --logger:trx;TestResults\unittest-results.xml'"
+        & 'vstest.console.exe  ' $frameworkUnitTestPaths '--Parallel --logger:trx;TestResults\unittest-results.xml'
         # & '.\Build\Tools\NUnit-Console\nunit3-console.exe ' $frameworkUnitTestPaths '--result=TestResults\NUnit2-results.xml;format=nunit2'
 
         if ($LastExitCode -ne 0)
