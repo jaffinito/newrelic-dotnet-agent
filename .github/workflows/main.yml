@@ -33,6 +33,9 @@ jobs:
 
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.1
+
+    - name: Setup VSTest Path
+      uses: darenm/Setup-VSTest@v1
     
     - name: Install dependencies for FullAgent.sln
       run: |
