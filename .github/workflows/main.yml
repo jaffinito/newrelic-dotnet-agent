@@ -79,7 +79,7 @@ jobs:
     - name: use this action, test solution dir
       uses: zyborg/dotnet-tests-report@v1.0.0
       with:
-        test_results_path: ${{ github.workspace }}\TestResults
+        test_results_path: ${{ github.workspace }}\TestResults\NUnit2-results.xml
         report_name: my_project_tests
         report_title: My Project Tests
         github_token: ${{ secrets.GITHUB_TOKEN }}
