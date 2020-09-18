@@ -5,7 +5,7 @@ on:
     branches: [ main,net35/main ]
   push:
     branches: [ main ]
-    workflow_dispatch:
+  workflow_dispatch:
 
 env:
   scripts_path: ${{ github.workspace }}\build\scripts
@@ -70,11 +70,52 @@ jobs:
         MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true -p:Platform=x64 ${{ env.msi_soluition_path }}
       shell: powershell
 
-    # - name: Unit Tests
-    #   run: |
-    #     Write-Host ${{ env.scripts_path }}\DotNet-Agent-CI-UnitTests.ps1
-    #     ${{ env.scripts_path }}\DotNet-Agent-CI-UnitTests.ps1
-    #   shell: powershell
+    - name: Unit Tests
+      run: |
+        Write-Host ${{ env.scripts_path }}\DotNet-Agent-CI-UnitTests.ps1
+        ${{ env.scripts_path }}\DotNet-Agent-CI-UnitTests.ps1
+        Write-Host "Creating TestResults directory to temporarily get around nunit limitation"
+        mkdir TestResults
+
+        $testDllPatterns = @('*Tests.dll', '*Test.dll', '*Test.Legacy.dll')
+
+        Write-Host "Finding files for Framework NUnit tests"
+        $frameworkTestPaths = @('Tests\Agent\UnitTests', 'Tests\NewRelic.Core.Tests')
+        $frameworkTestFileNames = (Get-ChildItem -Recurse -Path $frameworkTestPaths -Include $testDllPatterns | Where-Object { !$_.FullName.Contains('obj\Release') } | Select Name -Unique)
+        $frameworkFiles = (Get-ChildItem -Recurse -Path $frameworkTestPaths -Include $testDllPatterns | Where-Object { !$_.FullName.Contains('obj\Release')  })
+
+        Write-Host "Building file list for Framework NUnit tests"
+        $frameworkUnitTestPaths = @()
+        for ($i = 0; $i -lt $frameworkTestFileNames.Length; $i++)
+        { $frameworkFiles | ForEach-Object { if ($_.Name -eq $frameworkTestFileNames[$i].Name) { $frameworkUnitTestPaths += $_.FullName; Continue } } }
+
+        Write-Host "Executing Framework NUnit Tests:"
+        $frameworkUnitTestPaths | ForEach-Object { $_ }
+        & '.\Build\Tools\NUnit-Console\nunit3-console.exe ' $frameworkUnitTestPaths '--result=TestResults\NUnit2-results.xml;format=nunit2'
+
+        if ($LastExitCode -ne 0)
+        { exit $LastExitCode }
+
+
+        Write-Host "Finding files for .NET Core NUnit tests"
+        $netCoreTestFileNames = (Get-ChildItem -Recurse -Path 'Tests\AwsLambda\UnitTests' -Include $testDllPatterns | Where-Object { !$_.FullName.Contains('obj\Release') } | Select Name -Unique)
+        $netCoreFiles = (Get-ChildItem -Recurse -Path 'Tests\AwsLambda\UnitTests' -Include $testDllPatterns | Where-Object { !$_.FullName.Contains('obj\Release')  })
+
+        Write-Host "Building file list for .NET Core NUnit tests"
+        $netCoreUnitTestPaths = @()
+
+        for ($i = 0; $i -lt $netCoreTestFileNames.Length; $i++)
+        { $netCoreFiles | ForEach-Object { if ($_.Name -eq $netCoreTestFileNames[$i].Name) { $netCoreUnitTestPaths += $_.FullName; Continue } } }
+
+        Write-Host "Executing .NET Core NUnit Tests:"
+        $netCoreUnitTestPaths | ForEach-Object { $_ }
+
+        Write-Host "dotnet vstest " $netCoreUnitTestPaths " /Settings:.\Tests\AwsLambda\UnitTests\settings.runsettings"
+        dotnet vstest $netCoreUnitTestPaths /Settings:.\Tests\AwsLambda\UnitTests\settings.runsettings
+
+        if ($LastExitCode -ne 0)
+        { exit $LastExitCode }
+      shell: powershell
 
     # - name: use this action, test solution dir
     #   uses: zyborg/dotnet-tests-report@v1.0.0
@@ -83,70 +124,6 @@ jobs:
     #     report_name: my_project_tests
     #     report_title: My Project Tests
     #     github_token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Unit Tests - AsyncLocalTests
-      uses: zyborg/dotnet-tests-report@v1.0.0
-      with:
-        project_path: tests/Agent/AsyncLocalTests
-        report_name: AsyncLocalTests
-        report_title: AsyncLocalTests
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Unit Tests - CompositeTests
-      uses: zyborg/dotnet-tests-report@v1.0.0
-      with:
-        project_path: tests/Agent/CompositeTests
-        report_name: CompositeTests
-        report_title: CompositeTests
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Unit Tests - Core.UnitTests
-      uses: zyborg/dotnet-tests-report@v1.0.0
-      with:
-        project_path: tests/Agent/Core.UnitTests
-        report_name: Core.UnitTests
-        report_title: Core.UnitTests
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Unit Tests - NewRelic.Agent.Extensions.Tests
-      uses: zyborg/dotnet-tests-report@v1.0.0
-      with:
-        project_path: tests/Agent/NewRelic.Agent.Extensions.Tests
-        report_name: NewRelic.Agent.Extensions.Tests
-        report_title: NewRelic.Agent.Extensions.Tests
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Unit Tests - ParsingTests
-      uses: zyborg/dotnet-tests-report@v1.0.0
-      with:
-        project_path: tests/Agent/ParsingTests
-        report_name: ParsingTests
-        report_title: ParsingTests
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Unit Tests - NewRelic.Core.Tests
-      uses: zyborg/dotnet-tests-report@v1.0.0
-      with:
-        project_path: tests/NewRelic.Core.Tests
-        report_name: NewRelic.Core.Tests
-        report_title: NewRelic.Core.Tests
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Unit Tests - AwsLambdaOpenTracerTests
-      uses: zyborg/dotnet-tests-report@v1.0.0
-      with:
-        project_path: tests/AwsLambda/UnitTests/AwsLambdaOpenTracerTests
-        report_name: AwsLambdaOpenTracerTests
-        report_title: AwsLambdaOpenTracerTests
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Unit Tests - AwsLambdaWrapperTests
-      uses: zyborg/dotnet-tests-report@v1.0.0
-      with:
-        project_path: tests/AwsLambda/UnitTests/AwsLambdaWrapperTests
-        report_name: AwsLambdaWrapperTests
-        report_title: AwsLambdaWrapperTests
-        github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Archive the artifacts
       uses: actions/upload-artifact@v2
