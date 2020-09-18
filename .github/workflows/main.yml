@@ -94,8 +94,8 @@ jobs:
 
         Write-Host "Executing Framework NUnit Tests:"
         $frameworkUnitTestPaths | ForEach-Object { $_ }
-        Write-Host "& 'vstest.console.exe  ' $frameworkUnitTestPaths '--logger:trx'"
-        & 'vstest.console.exe  ' $frameworkUnitTestPaths '--logger:trx'
+        Write-Host "vstest.console.exe " $frameworkUnitTestPaths " --logger:trx;LogFileName=agent-results.trx"
+        vstest.console.exe $frameworkUnitTestPaths --logger:trx;LogFileName=agent-results.trx
         # & '.\Build\Tools\NUnit-Console\nunit3-console.exe ' $frameworkUnitTestPaths '--result=TestResults\NUnit2-results.xml;format=nunit2'
 
         if ($LastExitCode -ne 0)
@@ -115,8 +115,8 @@ jobs:
         Write-Host "Executing .NET Core NUnit Tests:"
         $netCoreUnitTestPaths | ForEach-Object { $_ }
 
-        Write-Host "dotnet vstest " $netCoreUnitTestPaths " /Settings:.\Tests\AwsLambda\UnitTests\settings.runsettings"
-        dotnet vstest $netCoreUnitTestPaths /Settings:.\Tests\AwsLambda\UnitTests\settings.runsettings
+        Write-Host "dotnet vstest " $netCoreUnitTestPaths " --logger trx --settings:.\Tests\AwsLambda\UnitTests\settings.runsettings"
+        dotnet vstest $netCoreUnitTestPaths --logger trx --settings:.\Tests\AwsLambda\UnitTests\settings.runsettings
 
         if ($LastExitCode -ne 0)
         { exit $LastExitCode }
