@@ -163,7 +163,7 @@ jobs:
           cd testresults
 
           Write-Host "Create the folder"
-          $resultname = "${{ github.workflow }}-${{ github.run_id }}-${{ github.run_id }}"
+          $resultname = "${{ github.workflow }}-${{ github.run_id }}-${{ github.run_id }}".ToLower().Replace(" ", "")
           New-Item -Path "${{ github.workspace }}\docs" -Name "$resultname" -ItemType "directory"
 
           Write-Host "Copy the files"
@@ -176,7 +176,7 @@ jobs:
       - name: Commit files
         run: |
           Write-Host "Set the folder path"
-          $resultname = "${{ github.workflow }}-${{ github.run_id }}-${{ github.run_id }}"
+          $resultname = "${{ github.workflow }}-${{ github.run_id }}-${{ github.run_id }}".ToLower().Replace(" ", "")
 
           Write-Host "git config"
           git config --local user.email "action@github.com"
@@ -196,7 +196,7 @@ jobs:
           branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}    
 
-      - uses: LouisBrunner/checks-action@v0.1.0
+      - uses: LouisBrunner/checks-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: "Test Results for ${{ github.workflow }} ${{ github.run_id }}"
