@@ -114,8 +114,8 @@ jobs:
         Write-Host "Executing .NET Core NUnit Tests:"
         $netCoreUnitTestPaths | ForEach-Object { $_ }
 
-        Write-Host "Executing: dotnet test " $netCoreUnitTestPaths " --logger trx --settings:.\Tests\AwsLambda\UnitTests\settings.runsettings"
-        dotnet test $netCoreUnitTestPaths --logger trx --settings:.\Tests\AwsLambda\UnitTests\settings.runsettings
+        Write-Host "Executing: dotnet test " $netCoreUnitTestPaths " --logger:'trx;LogFileName=lambda-results.trx'"
+        dotnet test $netCoreUnitTestPaths --logger:"trx;LogFileName=lambda-results.trx"
 
         if ($LastExitCode -ne 0)
         { exit $LastExitCode }
