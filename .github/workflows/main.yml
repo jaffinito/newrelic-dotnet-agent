@@ -196,7 +196,7 @@ jobs:
           branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}    
 
-      - uses: LouisBrunner/checks-action@v1
+      - uses: LouisBrunner/checks-action@v1.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: "Test Results for ${{ github.workflow }} ${{ github.run_id }}"
