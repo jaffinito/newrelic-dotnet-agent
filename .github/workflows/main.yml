@@ -157,7 +157,7 @@ jobs:
           name: test-results-${{ github.run_id }}
           path: testresults
 
-      - name: Stage Test results
+      - name: Move Test Results
         run: |
           Write-Host "Change to testresults"
           cd testresults
@@ -173,20 +173,17 @@ jobs:
           Test-Path "${{ github.workspace }}\docs\$resultname"
         shell: powershell
 
-      - name: Push to gh-pages
+      - name: Commit files
         run: |
           Write-Host "Set the folder path"
           $resultname = "${{ github.workflow }}-${{ github.run_id }}-${{ github.run_id }}"
-          
-          Write-Host "Confirm files"
-          ls  "${{ github.workspace }}\docs\$resultname"
-
-          Write-Host "git status"
-          git status
 
           Write-Host "git config"
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+
+          Write-Host "Stage files in git"
+          git add -A
 
           Write-Host "git commit"
           git commit -am "Test Results for ${{ github.workflow }} ${{ github.run_id }}"
