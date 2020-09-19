@@ -161,9 +161,8 @@ jobs:
         run: |
           cd testresults
           ls
-          # Expand-Archive -Path test-results-${{ github.run_id }} -DestinationPath .\
           $datestring = Get-Date -Format "yyyy-MM-dd_HHmmssfff"
-          $resultname = ${{ github.workflow }}-${{ github.run_id }}-$datestring
+          $resultname = "${{ github.workflow }}-${{ github.run_id }}-$datestring"
           New-Item -Path "${{ github.workspace }}\docs" -Name "$resultname" -ItemType "directory"
           Copy-Item .\ -destination ${{ github.workspace }}\docs\$resultname\
           git commit -am "Test Results for ${{ github.workflow }} ${{ github.run_id }}"
