@@ -121,13 +121,21 @@ jobs:
         { exit $LastExitCode }
       shell: powershell
 
-    # - name: use this action, test solution dir
-    #   uses: zyborg/dotnet-tests-report@v1.0.0
-    #   with:
-    #     test_results_path: ${{ github.workspace }}\TestResults\NUnit2-results.xml
-    #     report_name: my_project_tests
-    #     report_title: My Project Tests
-    #     github_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Agent Unit Test Results
+      uses: zyborg/dotnet-tests-report@v1.0.0
+      with:
+        test_results_path: ${{ github.workspace }}\TestResults\agent-results.xml
+        report_name: agent_tests
+        report_title: Agent Unit Test Results
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: AWS Lambda Unit Test Results
+      uses: zyborg/dotnet-tests-report@v1.0.0
+      with:
+        test_results_path: ${{ github.workspace }}\TestResults\lambda-results.xml
+        report_name: lambda_tests
+        report_title: AWS Lambda Unit Test Results
+        github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Archive the artifacts
       uses: actions/upload-artifact@v2
