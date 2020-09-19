@@ -183,7 +183,8 @@ jobs:
           git config --local user.name "GitHub Action"
 
           Write-Host "Stage files in git"
-          git add -A 2> $null
+          $ErrorActionPreference = 'Continue'
+          git add -A
 
           Write-Host "git commit"
           git commit -am "Test Results for ${{ github.workflow }} ${{ github.run_id }}"
