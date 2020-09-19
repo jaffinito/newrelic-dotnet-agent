@@ -165,6 +165,8 @@ jobs:
           $resultname = "${{ github.workflow }}-${{ github.run_id }}-$datestring"
           New-Item -Path "${{ github.workspace }}\docs" -Name "$resultname" -ItemType "directory"
           Copy-Item .\ -destination ${{ github.workspace }}\docs\$resultname\
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           git commit -am "Test Results for ${{ github.workflow }} ${{ github.run_id }}"
         shell: powershell
 
