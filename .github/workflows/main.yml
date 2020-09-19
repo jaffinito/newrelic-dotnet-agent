@@ -160,7 +160,7 @@ jobs:
       - name: Extract and Stage Test results
         run: |
           cd testresults
-          ls
+          git status
           $datestring = Get-Date -Format "yyyy-MM-dd_HHmmssfff"
           $resultname = "${{ github.workflow }}-${{ github.run_id }}-$datestring"
           New-Item -Path "${{ github.workspace }}\docs" -Name "$resultname" -ItemType "directory"
