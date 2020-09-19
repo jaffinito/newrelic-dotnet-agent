@@ -143,7 +143,7 @@ jobs:
     name: Publish Test Results
 
     runs-on: windows-2019
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -159,15 +159,39 @@ jobs:
 
       - name: Extract and Stage Test results
         run: |
+          Write-Host "Change to testresults"
           cd testresults
-          $datestring = Get-Date -Format "yyyy-MM-dd_HHmmssfff"
-          $resultname = "${{ github.workflow }}-${{ github.run_id }}-$datestring"
+
+          Write-Host "Create the folder name"
+          $resultname = "${{ github.workflow }}-${{ github.run_id }}-${{ github.run_id }}"
+
+          Write-Host "Create the folder"
           New-Item -Path "${{ github.workspace }}\docs" -Name "$resultname" -ItemType "directory"
+
+          Write-Host "Copy the files"
           Copy-Item .\ -destination ${{ github.workspace }}\docs\$resultname\
-          ls "${{ github.workspace }}\docs\$resultname\"
+
+          Write-Host "Confirm Folder Exists"
+          Test-Path "$resultname"
+
+        shell: powershell
+
+      - name: Extract and Stage Test results
+        run: |
+          Write-Host "Create the folder name"
+          $resultname = "${{ github.workflow }}-${{ github.run_id }}-${{ github.run_id }}"
+          
+          Write-Host "Confirm files"
+          ls  "$resultname"
+
+          Write-Host "git status"
           git status
+
+          Write-Host "git config"
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+
+          Write-Host "git commit"
           git commit -am "Test Results for ${{ github.workflow }} ${{ github.run_id }}"
         shell: powershell
 
