@@ -160,17 +160,8 @@ jobs:
       - name: Extract and Stage Test results
         run: |
           cd testresults
-          Expand-Archive -Path test-results-${{ github.run_id }} -DestinationPath .\
-          $datestring = Get-Date -Format "yyyy-MM-dd_HHmmssfff"
-          $resultname = ${{ github.workflow }}-${{ github.run_id }}-$datestring
-          New-Item -Path "${{ github.workspace }}\docs" -Name "$resultname" -ItemType "directory"
-          Copy-Item .\ -destination ${{ github.workspace }}\docs\$resultname\
-        shell: powershell
-
-      - name: Extract and Stage Test results
-        run: |
-          cd testresults
-          Expand-Archive -Path test-results-${{ github.run_id }} -DestinationPath .\
+          ls
+          # Expand-Archive -Path test-results-${{ github.run_id }} -DestinationPath .\
           $datestring = Get-Date -Format "yyyy-MM-dd_HHmmssfff"
           $resultname = ${{ github.workflow }}-${{ github.run_id }}-$datestring
           New-Item -Path "${{ github.workspace }}\docs" -Name "$resultname" -ItemType "directory"
@@ -184,3 +175,12 @@ jobs:
           branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}    
 
+      - uses: LouisBrunner/checks-action@v0.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: "Test Results for ${{ github.workflow }} ${{ github.run_id }}"
+          status: completed
+          conclusion: neutral
+          details_url: https://jaffinito.github.io/newrelic-dotnet-agent/
+          output: |
+            {"summary":${{ steps.test.outputs.summary }}}
