@@ -55,6 +55,17 @@ jobs:
         MSBuild.exe -m -p:Configuration=Release -p:AllowUnsafeBlocks=true ${{ env.fullagent_soluition_path }}
       shell: powershell
 
+    - name: Archive FullAgent Home folders
+      uses: actions/upload-artifact@v2
+      with:
+        name: homefolders-${{ github.run_id }}
+        path: |
+          ${{ github.workspace }}\src\Agent\newrelichome_x64
+          ${{ github.workspace }}\src\Agent\newrelichome_x64_coreclr
+          ${{ github.workspace }}\src\Agent\newrelichome_x64_coreclr_linux
+          ${{ github.workspace }}\src\Agent\newrelichome_x86
+          ${{ github.workspace }}\src\Agent\newrelichome_x86_coreclr
+
     - name: Create Self-signed code signing cert
       run: |
         Write-Host "New-SelfSignedCertificate -DnsName "Self-signed code signing cert" -Type CodeSigning -CertStoreLocation Cert:\CurrentUser\My -NotAfter (Get-Date).AddYears(100)"
@@ -124,7 +135,7 @@ jobs:
     - name: Agent Unit Test Results
       uses: zyborg/dotnet-tests-report@v1.0.0
       with:
-        test_results_path: ${{ github.workspace }}\TestResults\agent-results.xml
+        test_results_path: ${{ github.workspace }}\TestResults\agent-results.trx
         report_name: agent_tests
         report_title: Agent Unit Test Results
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -132,12 +143,12 @@ jobs:
     - name: AWS Lambda Unit Test Results
       uses: zyborg/dotnet-tests-report@v1.0.0
       with:
-        test_results_path: ${{ github.workspace }}\TestResults\lambda-results.xml
+        test_results_path: ${{ github.workspace }}\TestResults\lambda-results.trx
         report_name: lambda_tests
         report_title: AWS Lambda Unit Test Results
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Archive the artifacts
+    - name: Archive Test Results
       uses: actions/upload-artifact@v2
       with:
         name: my-artifact-${{ github.run_id }}
