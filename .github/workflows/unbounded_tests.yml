@@ -1,0 +1,45 @@
+name: .NET Agent Unbounded Integration Tests
+
+on:
+  # pull_request:
+  #   branches: [ main,net35/main ]
+  # push:
+  #   branches: [ main ]
+  workflow_dispatch:
+
+env:
+  scripts_path: ${{ github.workspace }}\build\scripts
+  tools_path: ${{ github.workspace }}\build\Tools
+  DOTNET_NOLOGO: true
+  #<other env vars here>
+
+jobs:
+
+  build-unbounded-tests:
+    name: Build UnboundedIntegrationTests
+
+    runs-on: windows-2019
+
+    env:
+      unbounded_soluition_path: ${{ github.workspace }}\tests\Agent\IntegrationTests\UnboundedIntegrationTests.sln
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.1
+
+    - name: Install dependencies for UnboundedIntegrationTests.sln
+      run: |
+        Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.unbounded_soluition_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
+        ${{ env.tools_path }}\nuget.exe restore ${{ env.unbounded_soluition_path }} -NoCache -Source "https://www.nuget.org/api/v2"
+      shell: powershell
+
+    - name: Build UnboundedIntegrationTests.sln
+      run: |
+        Write-Host "MSBuild.exe -m -p:Configuration=Release -p:DeployOnBuild=true -p:PublishProfile=LocalDeploy ${{ env.unbounded_soluition_path }}"
+        MSBuild.exe -m -p:Configuration=Release -p:DeployOnBuild=true -p:PublishProfile=LocalDeploy ${{ env.unbounded_soluition_path }}
+      shell: powershell

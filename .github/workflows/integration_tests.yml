@@ -1,0 +1,45 @@
+name: .NET Agent Integration Tests
+
+on:
+  # pull_request:
+  #   branches: [ main,net35/main ]
+  # push:
+  #   branches: [ main ]
+  workflow_dispatch:
+
+env:
+  scripts_path: ${{ github.workspace }}\build\scripts
+  tools_path: ${{ github.workspace }}\build\Tools
+  DOTNET_NOLOGO: true
+  #<other env vars here>
+
+jobs:
+
+  build-integration-tests:
+    name: Build IntegrationTests
+
+    runs-on: windows-2019
+
+    env:
+      integration_soluition_path: ${{ github.workspace }}\tests\Agent\IntegrationTests\IntegrationTests.sln
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.1
+
+    - name: Install dependencies for IntegrationTests.sln
+      run: |
+        Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.integration_soluition_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
+        ${{ env.tools_path }}\nuget.exe restore ${{ env.integration_soluition_path }} -NoCache -Source "https://www.nuget.org/api/v2"
+      shell: powershell
+
+    - name: Build IntegrationTests.sln
+      run: |
+        Write-Host "MSBuild.exe -m -p:Configuration=Release -p:DeployOnBuild=true -p:PublishProfile=LocalDeploy ${{ env.integration_soluition_path }}"
+        MSBuild.exe -m -p:Configuration=Release -p:DeployOnBuild=true -p:PublishProfile=LocalDeploy ${{ env.integration_soluition_path }}
+      shell: powershell

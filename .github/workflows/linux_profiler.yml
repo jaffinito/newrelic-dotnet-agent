@@ -1,0 +1,32 @@
+name: .NET Agent Linux Profiler Builder
+
+on:
+  # pull_request:
+  #   branches: [ main,net35/main ]
+  # push:
+  #   branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+
+  build-test-linux-profiler:
+    name: Build Linux Profiler
+
+    runs-on: ubuntu-18.04
+
+    env:
+      profiler_path: ${{ github.workspace }}/src/Agent/NewRelic/Profiler
+      #<other env vars here>
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Build Linux Profler
+      run: |
+        cd ${{ env.profiler_path }}
+        docker-compose build build
+        docker-compose run build
+      shell: bash
