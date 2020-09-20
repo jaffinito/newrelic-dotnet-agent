@@ -204,4 +204,4 @@ jobs:
           conclusion: neutral
           details_url: https://jaffinito.github.io/newrelic-dotnet-agent/
           output: |
-            {"summary":${{ steps.test.outputs.summary }}}
+            { "summary": "${{ steps.test.outputs.summary }}" }
