@@ -144,6 +144,9 @@ jobs:
 
     runs-on: windows-2019
 
+    env:
+      results_name: ""
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -163,7 +166,8 @@ jobs:
           cd testresults
 
           Write-Host "Create the folder"
-          $resultname = "${{ github.workflow }}-${{ github.run_id }}-${{ github.run_id }}".ToLower().Replace(" ", "")
+          $resultname = "fullagent_msi-${{ github.run_id }}".ToLower().Replace(" ", "")
+          Write-Host "::set-env name=results_name::$resultname"
           New-Item -Path "${{ github.workspace }}\docs" -Name "$resultname" -ItemType "directory"
 
           Write-Host "Copy the files"
@@ -175,9 +179,6 @@ jobs:
 
       - name: Commit files
         run: |
-          Write-Host "Set the folder path"
-          $resultname = "${{ github.workflow }}-${{ github.run_id }}-${{ github.run_id }}".ToLower().Replace(" ", "")
-
           Write-Host "git config"
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
@@ -204,4 +205,5 @@ jobs:
           conclusion: neutral
           details_url: https://jaffinito.github.io/newrelic-dotnet-agent/
           output: |
-            { "summary": "${{ steps.test.outputs.summary }}" }
+            { "summary": "${{ steps.test.outputs.summary }}",
+            "text": "[Test Results](https://jaffinito.github.io/newrelic-dotnet-agent/${{ env.results_name }}/agent-results.html)" }
