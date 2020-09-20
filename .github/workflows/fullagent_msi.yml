@@ -170,7 +170,10 @@ jobs:
           Write-Host "Create the folder"
           $resultname = "fullagent_msi-${{ github.run_id }}".ToLower().Replace(" ", "")
           Write-Host "::set-env name=results_name::$resultname"
-          New-Item -Path "${{ github.workspace }}\docs" -Name "testresults" -ItemType "directory"
+
+          if ( -Not (Test-Path "${{ github.workspace }}\docs\testresults" )) {
+            New-Item -Path "${{ github.workspace }}\docs" -Name "testresults" -ItemType "directory" }
+
           New-Item -Path "${{ github.workspace }}\docs\testresults" -Name "$resultname" -ItemType "directory"
 
           Write-Host "Copy the files"
