@@ -203,7 +203,7 @@ jobs:
           name: "Test Results for ${{ github.workflow }} ${{ github.run_id }}"
           status: completed
           conclusion: neutral
-          details_url: https://jaffinito.github.io/newrelic-dotnet-agent/
+          details_url: https://jaffinito.github.io/newrelic-dotnet-agent/${{ env.results_name }}/agent-results.html
           output: |
             { "summary": "${{ steps.test.outputs.summary }}",
-            "text": "[Test Results](https://jaffinito.github.io/newrelic-dotnet-agent/${{ env.results_name }}/agent-results.html)" }
+            "text_description": "[Test Results](https://jaffinito.github.io/newrelic-dotnet-agent/${{ env.results_name }}/agent-results.html)" }
