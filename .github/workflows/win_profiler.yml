@@ -1,10 +1,10 @@
 name: .NET Agent Windows Profiler Builder
 
 on:
-  # pull_request:
-  #   branches: [ main,net35/main ]
-  # push:
-  #   branches: [ main ]
+  pull_request:
+    branches: [ main,net35/main ]
+  push:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
