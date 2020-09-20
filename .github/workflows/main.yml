@@ -104,8 +104,8 @@ jobs:
         { $frameworkFiles | ForEach-Object { if ($_.Name -eq $frameworkTestFileNames[$i].Name) { $frameworkUnitTestPaths += $_.FullName; Continue } } }
 
         $frameworkUnitTestPaths | ForEach-Object { $_ }
-        Write-Host "Executing: vstest.console.exe " $frameworkUnitTestPaths " --logger:'html;LogFileName=agent-results.html'"
-        vstest.console.exe $frameworkUnitTestPaths --logger:"html;LogFileName=agent-results.html"
+        Write-Host "Executing: vstest.console.exe " $frameworkUnitTestPaths " --parallel --logger:'html;LogFileName=agent-results.html'"
+        vstest.console.exe $frameworkUnitTestPaths --parallel --logger:"html;LogFileName=agent-results.html"
         # & '.\Build\Tools\NUnit-Console\nunit3-console.exe ' $frameworkUnitTestPaths '--result=TestResults\NUnit2-results.xml;format=nunit2'
 
         if ($LastExitCode -ne 0)
@@ -125,14 +125,15 @@ jobs:
         Write-Host "Executing .NET Core NUnit Tests:"
         $netCoreUnitTestPaths | ForEach-Object { $_ }
 
-        Write-Host "Executing: dotnet test " $netCoreUnitTestPaths " --logger:'html;LogFileName=lambda-results.html'"
-        dotnet test $netCoreUnitTestPaths --logger:"html;LogFileName=lambda-results.html"
+        Write-Host "Executing: dotnet test " $netCoreUnitTestPaths " --parallel --logger:'html;LogFileName=lambda-results.html'"
+        dotnet test $netCoreUnitTestPaths --parallel --logger:"html;LogFileName=lambda-results.html"
 
         if ($LastExitCode -ne 0)
         { exit $LastExitCode }
       shell: powershell
 
     - name: Archive Test Results
+      if: ${{ always() }}
       uses: actions/upload-artifact@v2
       with:
         name: test-results-${{ github.run_id }}
@@ -140,6 +141,7 @@ jobs:
 
   publish-test-results:
     needs: build-test-fullagent-msi
+    if: ${{ always() }}
     name: Publish Test Results
 
     runs-on: windows-2019
