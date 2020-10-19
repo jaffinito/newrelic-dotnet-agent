@@ -28,10 +28,10 @@ jobs:
         Enable-WindowsOptionalFeature -Online -FeatureName IIS-DirectoryBrowsing
         Enable-WindowsOptionalFeature -Online -FeatureName IIS-StaticContent
         Enable-WindowsOptionalFeature -Online -FeatureName IIS-HttpRedirect
-        Enable-WindowsOptionalFeature -Online -FeatureName IIS-CustomLogging
         Enable-WindowsOptionalFeature -Online -FeatureName IIS-HttpLogging
         Enable-WindowsOptionalFeature -Online -FeatureName IIS-ODBCLogging
         Enable-WindowsOptionalFeature -Online -FeatureName IIS-HttpTracing
+        Enable-WindowsOptionalFeature -Online -FeatureName IIS-CustomLogging
         Enable-WindowsOptionalFeature -Online -FeatureName IIS-RequestMonitor
         Enable-WindowsOptionalFeature -Online -FeatureName IIS-HttpCompressionStatic
         Enable-WindowsOptionalFeature -Online -FeatureName IIS-HttpCompressionDynamic
