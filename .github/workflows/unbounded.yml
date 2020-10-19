@@ -245,7 +245,7 @@ jobs:
     strategy:
       matrix:
         #namespace: [ Couchbase, MongoDB, Msmq, MsSql, MySql, NServiceBus, Oracle, Postgres, RabbitMq, Redis ]
-        namespace: [ Msmq ]
+        namespace: [ MySql ] #skipped:MsSql
       fail-fast: false # we don't want one test failure in one namespace to kill the other runs
 
     env:
