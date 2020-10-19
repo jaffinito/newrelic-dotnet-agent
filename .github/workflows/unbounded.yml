@@ -1,6 +1,8 @@
 name: unbounded
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
 
 env:
@@ -283,8 +285,9 @@ jobs:
 
         if ("${{ matrix.namespace }}" -eq "Msmq") {
           Write-Host "Installing Msmq Features"
-          Enable-WindowsOptionalFeature -Online -FeatureName MSMQ-Server
-          Enable-WindowsOptionalFeature -Online -FeatureName MSMQ-HTTP
+          Enable-WindowsOptionalFeature -Online -FeatureName MSMQ-Server -All
+          Enable-WindowsOptionalFeature -Online -FeatureName MSMQ-HTTP -All
+          Enable-WindowsOptionalFeature -Online -FeatureName MSMQ-Triggers -All
         }
 
         if ("${{ matrix.namespace }}" -eq "MsSql") {
