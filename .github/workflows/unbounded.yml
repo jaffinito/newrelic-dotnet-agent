@@ -322,7 +322,8 @@ jobs:
 
         if ("${{ matrix.namespace }}" -eq "MsSql") {
           Write-Host "Installing MSSQL CLI"
-          msiexec /i ${{ github.workspace }}\build\Tools\sqlncli.msi /quiet /qn /norestart
+          msiexec /i ${{ github.workspace }}\build\Tools\sqlncli.msi IACCEPTSQLNCLILICENSETERMS=YES /quiet /qn /norestart /L*V ${{ github.workspace }}\build\Tools\sqlncli.log
+          Get-Content ${{ github.workspace }}\build\Tools\sqlncli.log
         }
       shell: powershell
 
