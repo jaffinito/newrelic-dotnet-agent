@@ -6,8 +6,6 @@ using MySql.Data.MySqlClient;
 using NewRelic.Agent.IntegrationTests.Shared;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Security.Authentication;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 
@@ -18,10 +16,6 @@ namespace BasicMvcApplication.Controllers
         [HttpGet]
         public string MySql()
         {
-             const SslProtocols _Tls12 = (SslProtocols)0x00000C00;
-             const SecurityProtocolType Tls12 = (SecurityProtocolType)_Tls12;
-             ServicePointManager.SecurityProtocol = Tls12;
-        
             var dates = new List<string>();
 
             using (var connection = new MySqlConnection(MySqlTestConfiguration.MySqlConnectionString))
@@ -43,10 +37,6 @@ namespace BasicMvcApplication.Controllers
         [HttpGet]
         public async Task<string> MySqlAsync()
         {
-            const SslProtocols _Tls12 = (SslProtocols)0x00000C00;
-            const SecurityProtocolType Tls12 = (SecurityProtocolType)_Tls12;
-            ServicePointManager.SecurityProtocol = Tls12;
-             
             var dates = new List<string>();
 
             using (var connection = new MySqlConnection(MySqlTestConfiguration.MySqlConnectionString))
@@ -68,10 +58,6 @@ namespace BasicMvcApplication.Controllers
         [HttpGet]
         public int MySqlParameterizedStoredProcedure(string procedureName, bool paramsWithAtSigns)
         {
-            const SslProtocols _Tls12 = (SslProtocols)0x00000C00;
-            const SecurityProtocolType Tls12 = (SecurityProtocolType)_Tls12;
-            ServicePointManager.SecurityProtocol = Tls12;
-            
             CreateProcedure(procedureName);
 
             using (var connection = new MySqlConnection(MySqlTestConfiguration.MySqlConnectionString))
