@@ -31,6 +31,7 @@ jobs:
         
         Write-Host "msiexec /i ${{ github.workspace }}\build\Tools\sqlncli.msi IACCEPTSQLNCLILICENSETERMS=YES /quiet /qn /norestart /L*V ${{ github.workspace }}\build\Tools\sqlncli.log"
         msiexec /i "${{ github.workspace }}\build\Tools\sqlncli.msi" IACCEPTSQLNCLILICENSETERMS=YES /quiet /qn /norestart /L*V "${{ github.workspace }}\build\Tools\sqlncli.log"
+        Start-Sleep 15
         ls
         
         Write-Host " "
