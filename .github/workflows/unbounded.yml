@@ -243,7 +243,7 @@ jobs:
     strategy:
       matrix:
         #namespace: [ Couchbase, MongoDB, Msmq, MsSql, MySql, NServiceBus, Oracle, Postgres, RabbitMq, Redis ]
-        namespace: [ Postgres ]
+        namespace: [ RabbitMq ] # failed: Postgres ;skipped:
       fail-fast: false # we don't want one test failure in one namespace to kill the other runs
 
     env:
@@ -255,7 +255,7 @@ jobs:
       enhanced_logging: true
 
     steps:
-    - name: My IP
+    - name: My IP - If this fails the IP ranges need updated
       run: (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
       shell: powershell
       
