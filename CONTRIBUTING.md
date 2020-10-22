@@ -17,7 +17,7 @@ Before submitting an Issue, please search for similar ones in the
 ### Version Support
 
 When contributing, please keep in mind that New Relic customers (that's you!) are running many different versions of .NET, some of them pretty old. Changes that depend on the newest version of .NET Framework or Core will probably be rejected, especially if they replace something backwards compatible.  Code in `src/Agent` or `src/NewRelic.Core` needs to be compatible with .NET Framework 4.5+ and with .NET Core 2.0+.  Backwards compatibility is less important for code that lives in `tests`, but still should not gratuitously require features only available in the latest .NET Framework or Core.
-
+sdfsdfsdfdsfsd
 Be aware that the instrumentation needs to work with a wide range of versions of the instrumented modules, and that code that looks nonsensical or overcomplicated may be that way for compatibility-related reasons. Read all the comments and check the related tests before deciding whether existing code is incorrect.
 
 If you’re planning on contributing a new feature or an otherwise complex contribution, we kindly ask you to start a conversation with the maintainer team by opening up a GitHub issue first.
