@@ -12,7 +12,17 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  cancel:
+    name: Cancel Previous Runs
+    runs-on: ubuntu-latest
+    steps:
+    - name: cancel running workflows
+      uses: everphone-gmbh/cancel-previous-workflows@v5
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
   run-unbounded-tests:
+    needs: [cancel]
     name: Run Unbounded Tests
 
     runs-on: windows-2019
@@ -27,5 +37,6 @@ jobs:
       run: |
         Write-Host "Installing MSSQL CLI"
         cd ${{ github.workspace }}\build\Tools
+        Start-Sleep 500
         ls
       shell: powershell
