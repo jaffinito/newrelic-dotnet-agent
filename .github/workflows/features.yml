@@ -5,6 +5,8 @@ name: featuretesting
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the main branch
 on:
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 
@@ -26,16 +28,4 @@ jobs:
         Write-Host "Installing MSSQL CLI"
         cd ${{ github.workspace }}\build\Tools
         ls
-        
-        Write-Host " "
-        
-        Write-Host "msiexec /i ${{ github.workspace }}\build\Tools\sqlncli.msi IACCEPTSQLNCLILICENSETERMS=YES /quiet /qn /norestart /L*V ${{ github.workspace }}\build\Tools\sqlncli.log"
-        msiexec /i "${{ github.workspace }}\build\Tools\sqlncli.msi" IACCEPTSQLNCLILICENSETERMS=YES /quiet /qn /norestart /L*V "${{ github.workspace }}\build\Tools\sqlncli.log"
-        Start-Sleep 15
-        ls
-        
-        Write-Host " "
-        
-        Write-Host "${{ github.workspace }}\build\Tools\sqlncli.log"
-        Get-Content "${{ github.workspace }}\build\Tools\sqlncli.log"
       shell: powershell
