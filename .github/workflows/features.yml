@@ -5,24 +5,13 @@ name: featuretesting
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the main branch
 on:
-  pull_request:
-    branches: [ main ]
+  release:
+    types: [ published ]
   workflow_dispatch:
-
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  cancel:
-    name: Cancel Previous Runs
-    runs-on: ubuntu-latest
-    steps:
-    - name: Cancel Previous Runs
-      uses: rokroskar/workflow-run-cleanup-action@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   run-unbounded-tests:
-    needs: [cancel]
     name: Run Unbounded Tests
 
     runs-on: windows-2019
@@ -35,8 +24,6 @@ jobs:
         
     - name: Install dependencies
       run: |
-        Write-Host "Installing MSSQL CLI"
-        cd ${{ github.workspace }}\build\Tools
-        Start-Sleep 500
+        Start-Sleep 10
         ls
       shell: powershell
