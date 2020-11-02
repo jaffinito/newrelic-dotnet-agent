@@ -261,10 +261,16 @@ jobs:
 
       - name: Build RPM
         run: |
-          agentVersion=$(< ${{ github.workspace }}/agent_version.txt)
+          echo "Getting Agent Version"
+          agentVersion=$(< ${{ github.workspace }}/agent_version.txt)\
+          echo "agentVersion is $agentVersion"
+          echo ">pushd /build/Linux"
           pushd /build/Linux
+          echo ">docker-compose build"
           docker-compose build
+          echo ">docker-compose run -e AGENT_VERSION=$agentVersion build_rpm"
           docker-compose run -e AGENT_VERSION=$agentVersion build_rpm
+          echo "I am done!"
           #docker-compose run -e AGENT_VERSION=$agentVersion -e GPG_KEYS=/keys/gpg.tar.bz2 build_rpm
         shell: bash
       
