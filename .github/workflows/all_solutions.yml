@@ -262,7 +262,7 @@ jobs:
       - name: Build RPM
         run: |
           echo "Getting Agent Version"
-          agentVersion=$(< ${{ github.workspace }}/agent_version.txt)\
+          agentVersion=$(< ${{ github.workspace }}/agent_version.txt)
           echo "agentVersion is $agentVersion"
           echo ">pushd /build/Linux"
           pushd /build/Linux
