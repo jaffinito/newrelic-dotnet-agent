@@ -206,18 +206,12 @@ jobs:
 
       - name: Build RPM
         run: |
-          echo "ls -la ${{ github.workspace }}?"
-          ls -la ${{ github.workspace }}
-          
-          echo "cat ${{ github.workspace }}/agent_version.txt"
-          cat ${{ github.workspace }}/agent_version.txt
-          
           echo "Getting Agent Version"
           agentVersion=$(< ${{ github.workspace }}/agent_version.txt)
           echo "agentVersion is $agentVersion"
           
-          echo ">pushd /build/Linux"
-          pushd /build/Linux
+          echo ">cd ${{ github.workspace }}/build/Linux"
+          cd ${{ github.workspace }}/build/Linux
           
           echo ">docker-compose build"
           docker-compose build
