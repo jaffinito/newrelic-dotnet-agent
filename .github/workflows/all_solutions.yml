@@ -165,18 +165,6 @@ jobs:
 
       - name: Run ArtifactBuilder
         run: |
-          Write-Host "${{ github.workspace }}\src\_build"
-          ls ${{ github.workspace }}\src\_build
-          
-          Write-Host "${{ github.workspace }}src\_build\CoreArtifacts"
-          ls ${{ github.workspace }}\src\_build\CoreArtifacts
-          
-          Write-Host "${{ github.workspace }}\build\BuildArtifacts\"
-          ls ${{ github.workspace }}\build\BuildArtifacts\
-          
-          Write-Host "${{ github.workspace }}\build\BuildArtifacts\LinuxDeb"
-          ls ${{ github.workspace }}\build\BuildArtifacts\LinuxDeb
-          
           ${{ github.workspace }}\build\package.ps1 -configuration Release -IncludeDownloadSite
         shell: powershell
 
