@@ -206,14 +206,11 @@ jobs:
 
       - name: Build RPM
         run: |
-          echo "Getting Agent Version"
-          agentVersion=$(< ${{ github.workspace }}/agent_version.txt)
-          echo "agentVersion is $agentVersion"
+          agentVersion=$(head -n 1 ${{ github.workspace }}/agent_version.txt)
+          agentVersion=${agentVersion/$'\r\n\t'}
+          echo "agentVersion is |$agentVersion|"
           
-          echo ">cd ${{ github.workspace }}/build/Linux"
           cd ${{ github.workspace }}/build/Linux
-          
-          echo ">docker-compose build"
           docker-compose build
           
           echo ">docker-compose run -e AGENT_VERSION=$agentVersion build_rpm"
