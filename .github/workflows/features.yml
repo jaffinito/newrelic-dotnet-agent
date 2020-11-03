@@ -5,15 +5,14 @@ name: featuretesting
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the main branch
 on:
-  release:
-    types: [ published ]
   workflow_dispatch:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   run-unbounded-tests:
+    if: ${{ github.event.release }}
     name: Run Unbounded Tests
-
+    
     runs-on: windows-2019
 
     steps:
