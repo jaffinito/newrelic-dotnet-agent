@@ -238,5 +238,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: build-folder-artifacts
-          path: ${{ github.workspace }}/src/_build/CoreArtifacts/*.rpm
+          path: ${{ github.workspace }}/src/_build
           if-no-files-found: error
