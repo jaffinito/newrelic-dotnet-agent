@@ -206,7 +206,7 @@ jobs:
 
       - name: Build RPM
         run: |
-          apt install dos2unix -y
+          sudo apt install dos2unix -y
           dos2unix ${{ github.workspace }}/agent_version.txt
           agentVersion=$(head -n 1 ${{ github.workspace }}/agent_version.txt)
           agentVersion=${agentVersion/$'\r\n\t'}
