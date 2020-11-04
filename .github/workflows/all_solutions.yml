@@ -2,6 +2,8 @@ name: .NET Agent All Solutions Build
 
 # Does not run on PUSH since we have already ran all the test
 on:
+  release:
+    types: [ published ]
   workflow_dispatch:
 
 env:
@@ -11,8 +13,114 @@ env:
 
 jobs:
 
-# This builds both FullAgent and MSIInstaller since MSIInstaller requires FullAgent artifacts.
+  cancel-previous-workflow-runs:
+    name: Cancel Previous Runs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: rokroskar/workflow-run-cleanup-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-windows-profiler:
+    needs: cancel-previous-workflow-runs
+    if: ${{ always() }}
+    name: Build Windows Profiler
+    runs-on: windows-2019
+
+    env:
+      profiler_path: ${{ github.workspace }}\src\Agent\NewRelic\Profiler
+      profiler_solution_path: ${{ github.workspace }}\src\Agent\NewRelic\Profiler\NewRelic.Profiler.sln
+      output_path: ${{ github.workspace }}\src\Agent\_profilerBuild
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.1
+
+      - name: Clean out _profilerBuild directory
+        run: |
+          Remove-Item -Path "${{ github.workspace }}\src\Agent\_profilerBuild\*.*" -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path "${{ github.workspace }}\src\Agent\_profilerBuild\x64-Release" -Recurse -Force  -ErrorAction SilentlyContinue
+          Remove-Item -Path "${{ github.workspace }}\src\Agent\_profilerBuild\x86-Release" -Recurse -Force  -ErrorAction SilentlyContinue
+          Remove-Item -Path "${{ github.workspace }}\src\Agent\_profilerBuild\linux-release" -Recurse -Force  -ErrorAction SilentlyContinue
+        shell: powershell
+
+      - name: Install dependencies
+        run: |
+          Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.profiler_solution_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
+          ${{ env.tools_path }}\nuget.exe restore ${{ env.profiler_solution_path }} -NoCache -Source "https://www.nuget.org/api/v2"
+        shell: powershell
+
+      - name: Build x64
+        run: |
+          Write-Host "MSBuild.exe -m -p:Platform=x64 -p:Configuration=Release ${{ env.profiler_solution_path }}"
+          MSBuild.exe -m -p:Platform=x64 -p:Configuration=Release ${{ env.profiler_solution_path }}
+        shell: powershell
+        
+      - name: Build x86
+        run: |
+          Write-Host "MSBuild.exe -m -p:Platform=Win32 -p:Configuration=Release ${{ env.profiler_solution_path }}"
+          MSBuild.exe -m -p:Platform=Win32 -p:Configuration=Release ${{ env.profiler_solution_path }}
+        shell: powershell
+
+      - name: Archive Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: profiler
+          path: ${{ github.workspace }}\src\Agent\_profilerBuild\**\*
+          if-no-files-found: error
+
+  build-linux-profiler:
+    needs: cancel-previous-workflow-runs
+    if: ${{ always() }}
+    name: Build Linux Profiler
+    runs-on: ubuntu-18.04
+
+    env:
+      profiler_path: ${{ github.workspace }}/src/Agent/NewRelic/Profiler
+      #<other env vars here>
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Clean out _profilerBuild directory
+        run: |
+          rm -f ${{ github.workspace }}/src/Agent/_profilerBuild/*.*
+          rm -rf ${{ github.workspace }}/src/Agent/_profilerBuild/linux-release
+          rm -rf ${{ github.workspace }}/src/Agent/_profilerBuild/x64-Release
+          rm -rf ${{ github.workspace }}/src/Agent/_profilerBuild/x86-Release
+        shell: bash
+
+      - name: Build Linux Profler
+        run: |
+          cd ${{ env.profiler_path }}
+          docker-compose build build
+          docker-compose run build
+        shell: bash
+
+      - name: Move Profiler to staging folder
+        run: |
+          mkdir --parents ${{ github.workspace }}/src/Agent/_profilerBuild/linux-release/
+          mv -f ${{ env.profiler_path }}/libNewRelicProfiler.so  ${{ github.workspace }}/src/Agent/_profilerBuild/linux-release/libNewRelicProfiler.so
+        shell: bash
+
+      - name: Archive Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: profiler
+          path: ${{ github.workspace }}/src/Agent/_profilerBuild/
+          if-no-files-found: error
+
+  # This builds both FullAgent and MSIInstaller since MSIInstaller requires FullAgent artifacts.
   build-test-fullagent-msi:
+    needs: [ build-windows-profiler, build-linux-profiler ]
     name: Build and Test FullAgent and MSIInstaller
     runs-on: windows-2019
 
@@ -31,7 +139,21 @@ jobs:
 
       - name: Setup VSTest Path
         uses: darenm/Setup-VSTest@v1
- 
+
+      - name: Clean out _profilerBuild directory
+        run: |
+          Remove-Item -Path "${{ github.workspace }}\src\Agent\_profilerBuild\*.*" -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path "${{ github.workspace }}\src\Agent\_profilerBuild\x64-Release" -Recurse -Force  -ErrorAction SilentlyContinue
+          Remove-Item -Path "${{ github.workspace }}\src\Agent\_profilerBuild\x86-Release" -Recurse -Force  -ErrorAction SilentlyContinue
+          Remove-Item -Path "${{ github.workspace }}\src\Agent\_profilerBuild\linux-release" -Recurse -Force  -ErrorAction SilentlyContinue
+        shell: powershell
+
+      - name: Download Profiler Artifacts Before Agent Build
+        uses: actions/download-artifact@v2
+        with:
+          name: profiler
+          path: ${{ github.workspace }}/src/Agent/_profilerBuild/
+      
       - name: Install dependencies for FullAgent.sln
         run: |
           Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.fullagent_solution_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
@@ -90,16 +212,10 @@ jobs:
             ${{ github.workspace }}\src\Agent\newrelichome_x86_coreclr
           if-no-files-found: error
 
-      - name: Get Code Signing Certificate
-        id: write_cert
-        uses: timheuer/base64-to-file@v1
-        with:
-          fileName: 'newrelic_code_sign_cert.pfx'
-          encodedString: ${{ secrets.SIGNING_CERT }}
-          
-      - name: Install Code Signing Certificate
+      - name: Create Self-signed code signing cert
         run: |
-          certutil.exe -f -user -p ${{ secrets.CERT_PASSPHRASE }} -importPFX ${{ steps.write_cert.outputs.filePath }} NoRoot
+          Write-Host "New-SelfSignedCertificate -DnsName "Self-signed code signing cert" -Type CodeSigning -CertStoreLocation Cert:\CurrentUser\My -NotAfter (Get-Date).AddYears(100)"
+          New-SelfSignedCertificate -DnsName "Self-signed code signing cert" -Type CodeSigning -CertStoreLocation Cert:\CurrentUser\My -NotAfter (Get-Date).AddYears(100)
         shell: powershell
 
       - name: Build MsiInstaller.sln x86
@@ -126,10 +242,59 @@ jobs:
         with:
           name: NewRelic.OpenTracing.AmazonLambda.Tracer
           path: ${{ github.workspace }}\src\AwsLambda\AwsLambdaOpenTracer\bin\Release\netstandard2.0-ILRepacked
+
+  create-package-rpm:
+    needs: build-test-fullagent-msi
+    if: ${{ github.event.release }}
+    name: Create RPM Package
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      
+      - name: Download _build Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build-folder-artifacts
+          path: src/_build
+
+      - name: Download Agent Home Folders
+        uses: actions/download-artifact@v2
+        with:
+          name: homefolders
+          path: src/Agent
+      
+      - name: Download Agent Version
+        uses: actions/download-artifact@v2
+        with:
+          name: agent-version
+          path: ${{ github.workspace }}
+
+      - name: Build RPM
+        run: |
+          sudo apt install dos2unix -y
+          dos2unix ${{ github.workspace }}/agent_version.txt
+          agentVersion=$(head -n 1 ${{ github.workspace }}/agent_version.txt)
+          agentVersion=${agentVersion/$'\r\n\t'}
+          cd ${{ github.workspace }}/build/Linux
+          docker-compose build
+          docker-compose run -e AGENT_VERSION=$agentVersion build_rpm
+          #docker-compose run -e AGENT_VERSION=$agentVersion -e GPG_KEYS=/keys/gpg.tar.bz2 build_rpm
+        shell: bash
+      
+      - name: Archive Package Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-folder-artifacts
+          path: ${{ github.workspace }}/src/_build
           if-no-files-found: error
 
   run-artifactbuilder:
-    needs: create-package-rpm
+    needs: [ create-package-rpm ]
+    if: ${{ github.event.release }}
     name: Run ArtifactBuilder
     runs-on: windows-2019
 
@@ -179,64 +344,4 @@ jobs:
         with:
           name: deploy-artifacts
           path: ${{ github.workspace }}\build\BuildArtifacts
-          if-no-files-found: error
-
-  create-package-rpm:
-    needs: build-test-fullagent-msi
-    name: Create RPM Package
-    runs-on: ubuntu-18.04
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      
-      - name: Download _build Artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: build-folder-artifacts
-          path: src/_build
-
-      - name: Download Agent Home Folders
-        uses: actions/download-artifact@v2
-        with:
-          name: homefolders
-          path: src/Agent
-      
-      - name: Download Agent Version
-        uses: actions/download-artifact@v2
-        with:
-          name: agent-version
-          path: ${{ github.workspace }}
-      
-      - name: Get GPG Key
-        id: write_gpgkey
-        uses: timheuer/base64-to-file@v1
-        with:
-          fileName: 'gpg.tar.bz2'
-          encodedString: ${{ secrets.GPG_KEY }}
-          
-      - name: Copy GPG Key to keys
-        run: |
-          mkdir ${{ github.workspace }}/build/Linux/keys
-          cp -f ${{ steps.write_gpgkey.outputs.filePath }} ${{ github.workspace }}/build/Linux/keys/gpg.tar.bz2
-        shell: bash
-
-      - name: Build RPM
-        run: |
-          sudo apt install dos2unix -y
-          dos2unix ${{ github.workspace }}/agent_version.txt
-          agentVersion=$(head -n 1 ${{ github.workspace }}/agent_version.txt)
-          agentVersion=${agentVersion/$'\r\n\t'}
-          cd ${{ github.workspace }}/build/Linux
-          docker-compose build
-          docker-compose run -e AGENT_VERSION=$agentVersion -e GPG_KEYS=/keys/gpg.tar.bz2 build_rpm
-        shell: bash
-      
-      - name: Archive Package Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: build-folder-artifacts
-          path: ${{ github.workspace }}/src/_build
           if-no-files-found: error
