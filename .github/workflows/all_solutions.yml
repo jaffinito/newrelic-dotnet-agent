@@ -91,6 +91,7 @@ jobs:
           if-no-files-found: error
 
       - name: Get Cert
+        id: write_cert
         uses: timheuer/base64-to-file@v1
         with:
           fileName: 'newrelic_code_sign_cert.pfx'
@@ -98,6 +99,7 @@ jobs:
           
       - name: File check
         run: |
+          copy ${{ steps.write_cert.outputs.filePath }}  ${{ github.workspace }}\newrelic_code_sign_cert.pfx
           ls
         shell: powershell
 
