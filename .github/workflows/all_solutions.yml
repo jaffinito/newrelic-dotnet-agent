@@ -90,17 +90,16 @@ jobs:
             ${{ github.workspace }}\src\Agent\newrelichome_x86_coreclr
           if-no-files-found: error
 
-      - name: Get Cert
+      - name: Get Code Signing Certificate
         id: write_cert
         uses: timheuer/base64-to-file@v1
         with:
           fileName: 'newrelic_code_sign_cert.pfx'
           encodedString: ${{ secrets.SIGNING_CERT }}
           
-      - name: File check
+      - name: Install Code Signing Certificate
         run: |
-          copy ${{ steps.write_cert.outputs.filePath }}  ${{ github.workspace }}\newrelic_code_sign_cert.pfx
-          ls
+          certutil.exe -f -user -p ${{ secrets.CERT_PASSPHRASE }} -importPFX ${{ steps.write_cert.outputs.filePath }}
         shell: powershell
 
       - name: Build MsiInstaller.sln x86
