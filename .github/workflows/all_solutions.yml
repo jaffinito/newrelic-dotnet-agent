@@ -127,3 +127,110 @@ jobs:
           name: NewRelic.OpenTracing.AmazonLambda.Tracer
           path: ${{ github.workspace }}\src\AwsLambda\AwsLambdaOpenTracer\bin\Release\netstandard2.0-ILRepacked
           if-no-files-found: error
+
+  run-artifactbuilder:
+    needs: create-package-rpm
+    name: Run ArtifactBuilder
+    runs-on: windows-2019
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Download Agent Home Folders
+        uses: actions/download-artifact@v2
+        with:
+          name: homefolders
+          path: src/Agent 
+      
+      - name: Download _build Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build-folder-artifacts
+          path: src/_build
+
+      - name: Download NewRelic.NuGetHelper
+        uses: actions/download-artifact@v2
+        with:
+          name: NewRelic.NuGetHelper
+          path: build/NewRelic.NuGetHelper/bin
+      
+      - name: Download NewRelic.Agent.Extensions
+        uses: actions/download-artifact@v2
+        with:
+          name: NewRelic.Agent.Extensions
+          path: src/Agent/NewRelic/Agent/Extensions/NewRelic.Agent.Extensions/bin/Release
+
+      - name: Download NewRelic.OpenTracing.AmazonLambda.Tracer
+        uses: actions/download-artifact@v2
+        with:
+          name: NewRelic.OpenTracing.AmazonLambda.Tracer
+          path: src/AwsLambda/AwsLambdaOpenTracer/bin/Release/netstandard2.0-ILRepacked
+
+      - name: Run ArtifactBuilder
+        run: |
+          ${{ github.workspace }}\build\package.ps1 -configuration Release -IncludeDownloadSite
+        shell: powershell
+
+      - name: Archive Deploy Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: deploy-artifacts
+          path: ${{ github.workspace }}\build\BuildArtifacts
+          if-no-files-found: error
+
+  create-package-rpm:
+    needs: build-test-fullagent-msi
+    name: Create RPM Package
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      
+      - name: Download _build Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build-folder-artifacts
+          path: src/_build
+
+      - name: Download Agent Home Folders
+        uses: actions/download-artifact@v2
+        with:
+          name: homefolders
+          path: src/Agent
+      
+      - name: Download Agent Version
+        uses: actions/download-artifact@v2
+        with:
+          name: agent-version
+          path: ${{ github.workspace }}
+      
+      - name: Get GPG Key
+        id: write_gpgkey
+        uses: timheuer/base64-to-file@v1
+        with:
+          fileName: 'gpg.tar.bz2'
+          encodedString: ${{ secrets.GPG_KEY }}
+
+      - name: Build RPM
+        run: |
+          sudo apt install dos2unix -y
+          dos2unix ${{ github.workspace }}/agent_version.txt
+          agentVersion=$(head -n 1 ${{ github.workspace }}/agent_version.txt)
+          agentVersion=${agentVersion/$'\r\n\t'}
+          cd ${{ github.workspace }}/build/Linux
+          docker-compose build
+          docker-compose run -e AGENT_VERSION=$agentVersion -e GPG_KEYS=${{ steps.write_gpgkey.outputs.filePath }} build_rpm
+        shell: bash
+      
+      - name: Archive Package Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-folder-artifacts
+          path: ${{ github.workspace }}/src/_build
+          if-no-files-found: error
