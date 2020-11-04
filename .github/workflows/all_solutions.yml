@@ -99,7 +99,7 @@ jobs:
           
       - name: Install Code Signing Certificate
         run: |
-          certutil.exe -f -user -p ${{ secrets.CERT_PASSPHRASE }} -importPFX ${{ steps.write_cert.outputs.filePath }}
+          certutil.exe -f -user -p ${{ secrets.CERT_PASSPHRASE }} -importPFX ${{ steps.write_cert.outputs.filePath }} NoRoot
         shell: powershell
 
       - name: Build MsiInstaller.sln x86
