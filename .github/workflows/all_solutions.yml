@@ -219,6 +219,7 @@ jobs:
           
       - name: Copy GPG Key to keys
         run: |
+          mkdir ${{ github.workspace }}/build/Linux/keys
           cp -f ${{ steps.write_gpgkey.outputs.filePath }} ${{ github.workspace }}/build/Linux/keys/gpg.tar.bz2
         shell: bash
 
