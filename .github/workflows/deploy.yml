@@ -89,7 +89,9 @@ jobs:
           Copy-Item .\working_dir\* .\latest_release\ -Force -Recurse
           cd .\latest_release
           if ("${{ github.event.inputs.deploy }}" -eq "true") {
-            aws s3 sync . ${{ secrets.BUCKET_NAME }}/dot_net_agent/latest_release/ --include "*" --exclude ".DS_Store" --delete
+            Write-Host "Should not be here"
+            Write-Host "aws s3 sync . ${{ secrets.BUCKET_NAME }}/dot_net_agent/latest_release/ --include "*" --exclude ".DS_Store" --delete"
+            #aws s3 sync . ${{ secrets.BUCKET_NAME }}/dot_net_agent/latest_release/ --include "*" --exclude ".DS_Store" --delete
           }
           else {
             Write-Host "Input:deploy was not true (${{ github.event.inputs.deploy }}).  The following deploy command was not run:"
@@ -101,7 +103,9 @@ jobs:
           Copy-Item .\working_dir\* ".\previous_releases\${{ github.event.inputs.agent_version }}\" -Force -Recurse
           cd .\previous_releases\${{ github.event.inputs.agent_version }}
           if ("${{ github.event.inputs.deploy }}" -eq "true") {
-            aws s3 sync . ${{ secrets.BUCKET_NAME }}/dot_net_agent/previous_releases/${{ github.event.inputs.agent_version }}/dot_net_agent/latest_release/ --include "*" --exclude ".DS_Store" --delete
+            Write-Host "Should not be here"
+            Write-Host "aws s3 sync . ${{ secrets.BUCKET_NAME }}/dot_net_agent/previous_releases/${{ github.event.inputs.agent_version }}/dot_net_agent/latest_release/ --include "*" --exclude ".DS_Store" --delete"
+            #aws s3 sync . ${{ secrets.BUCKET_NAME }}/dot_net_agent/previous_releases/${{ github.event.inputs.agent_version }}/dot_net_agent/latest_release/ --include "*" --exclude ".DS_Store" --delete
           }
           else {
             Write-Host "Input:deploy was not true (${{ github.event.inputs.deploy }}).  The following deploy command was not run:"
@@ -136,6 +140,7 @@ jobs:
           $packagePath = Convert-Path ${{ github.workspace }}\working_dir\NugetAgent\$packageName
           $version = $packageName.TrimStart('NewRelic.Agent').TrimStart('.').TrimEnd('.nupkg')
           if ("${{ github.event.inputs.deploy }}" -eq "true") {
+            Write-Host "Should not be here"
             nuget.exe push $packagePath -Source ${{ env.nuget_source }}
           }
           else {
@@ -150,6 +155,7 @@ jobs:
           $packagePath = Convert-Path ${{ github.workspace }}\working_dir\NugetAgentApi\$packageName
           $version = $packageName.TrimStart('NewRelic.Agent.Api').TrimStart('.').TrimEnd('.nupkg')
           if ("${{ github.event.inputs.deploy }}" -eq "true") {
+            Write-Host "Should not be here"
             nuget.exe push $packagePath -Source ${{ env.nuget_source }}
           }
           else {
@@ -164,6 +170,7 @@ jobs:
           $packagePath = Convert-Path ${{ github.workspace }}\working_dir\NugetAzureCloudServices\$packageName
           $version = $packageName.TrimStart('NewRelicWindowsAzure').TrimStart('.').TrimEnd('.nupkg')
           if ("${{ github.event.inputs.deploy }}" -eq "true") {
+            Write-Host "Should not be here"
             nuget.exe push $packagePath -Source ${{ env.nuget_source }}
           }
           else {
@@ -178,6 +185,7 @@ jobs:
           $packagePath = Convert-Path ${{ github.workspace }}\working_dir\NugetAzureWebSites-x64\$packageName
           $version = $packageName.TrimStart('NewRelic.Azure.WebSites.x').TrimStart('.').TrimEnd('.nupkg')
           if ("${{ github.event.inputs.deploy }}" -eq "true") {
+            Write-Host "Should not be here"
             nuget.exe push $packagePath -Source ${{ env.nuget_source }}
           }
           else {
@@ -192,6 +200,7 @@ jobs:
           $packagePath = Convert-Path ${{ github.workspace }}\working_dir\NugetAzureWebSites-x86\$packageName
           $version = $packageName.TrimStart('NewRelic.Azure.WebSites.x').TrimStart('.').TrimEnd('.nupkg')
           if ("${{ github.event.inputs.deploy }}" -eq "true") {
+            Write-Host "Should not be here"
             nuget.exe push $packagePath -Source ${{ env.nuget_source }}
           }
           else {
@@ -263,7 +272,9 @@ jobs:
           # Run docker-compose
           docker-compose build
           if [ "${{ github.event.inputs.deploy }}" == "true" ] ; then
-            docker-compose run deploy_packages
+            echo "Should not be here"
+            echo "docker-compose run deploy_packages"
+            #docker-compose run deploy_packages
           else
             echo "Input:deploy was not true (${{ github.event.inputs.deploy }}).  The following deploy command was not run:"
             echo "docker-compose run deploy_packages"
