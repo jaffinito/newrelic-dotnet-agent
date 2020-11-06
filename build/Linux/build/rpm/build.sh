@@ -99,6 +99,6 @@ if [[ ! -z "$GPG_KEYS" ]]; then
     sign_rpm "$rpm_file"
 fi
 
-if [ $? -ge 0 ] ; then
+if [ $? -gt 0 ] ; then
     echo "::error Docker run exited with code: $?"
 fi
