@@ -36,6 +36,11 @@ cp /docs/netcore20-agent-readme.md ./README.md
 
 dos2unix *.x* extensions/*.x* *.sh
 
+echo "=========================="
+ls -la /deb
+echo "=========================="
+
+
 cp /deb/control ${INSTALL_ROOT}/DEBIAN
 cp /deb/postinst ${INSTALL_ROOT}/DEBIAN
 cp /deb/conffiles ${INSTALL_ROOT}/DEBIAN
