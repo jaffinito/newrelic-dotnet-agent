@@ -6,11 +6,16 @@ name: featuretesting
 # events but only for the main branch
 on:
   workflow_dispatch:
+    inputs:
+      agent_version:
+        description: 'Agent Version to deploy.  Needs to match the version from the Release Workflow (all_solutions.yml). Format: X.X.X'
+        required: true
+    
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   run-unbounded-tests:
-    if: ${{ github.event.release }}
+    if: ${{ github.event.inputs.downloadsite == "true" }}
     name: Run Unbounded Tests
     
     runs-on: windows-2019
@@ -20,9 +25,3 @@ jobs:
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
-        
-    - name: Install dependencies
-      run: |
-        Start-Sleep 10
-        ls
-      shell: powershell
