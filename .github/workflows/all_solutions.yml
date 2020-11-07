@@ -15,7 +15,17 @@ env:
 
 jobs:
 
+  github-runid:
+    name: Get the GitHub Workflow Run ID
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run ID
+        run: |
+          echo "${{ github.run_id }}"
+        shell: bash
+
   cancel-previous-workflow-runs:
+    needs: github-runid
     name: Cancel Previous Runs
     runs-on: ubuntu-latest
     steps:
