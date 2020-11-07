@@ -6,27 +6,15 @@ name: featuretesting
 # events but only for the main branch
 on:
   workflow_dispatch:
-    inputs:
-      agent_version:
-        description: 'Agent Version to deploy.  Needs to match the version from the Release Workflow (all_solutions.yml). Format: X.X.X'
-        required: true
-    
+   
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  run-unbounded-tests:
-    if: ${{ github.event.inputs.agent_version == 'true' }}
-    name: Run Unbounded Tests
-    
-    runs-on: windows-2019
-
+  github-runid:
+    name: Get the GitHub Workflow Run ID
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Do stuff
+      - name: Run ID
         run: |
-          ls
-        shell: powershell
+          echo "${{ github.run_id }}"
+        shell: bash
