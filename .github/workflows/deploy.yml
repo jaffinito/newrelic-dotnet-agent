@@ -242,8 +242,8 @@ jobs:
       - name: Move Artifacts an GPG Key to Staging Location
         run: |
           ls -la
-          cp *.rpm ${{ github.workspace }}/deploy/linux/packages
-          cp *.deb ${{ github.workspace }}/deploy/linux/packages
+          cp LinuxRpm/*.rpm ${{ github.workspace }}/deploy/linux/packages
+          cp LinuxDeb/*.deb ${{ github.workspace }}/deploy/linux/packages
           cp -f ${{ steps.write_gpgkey.outputs.filePath }} ${{ github.workspace }}/deploy/linux/deploy_scripts/gpg.tar.bz2
         shell: bash
 
