@@ -141,7 +141,8 @@ jobs:
           $version = $packageName.TrimStart('NewRelic.Agent').TrimStart('.').TrimEnd('.nupkg')
           if ("${{ github.event.inputs.deploy }}" -eq "true") {
             Write-Host "Should not be here"
-            nuget.exe push $packagePath -Source ${{ env.nuget_source }}
+            Write-Host "nuget.exe push $packagePath -Source ${{ env.nuget_source }}"
+            #nuget.exe push $packagePath -Source ${{ env.nuget_source }}
           }
           else {
             Write-Host "Input:deploy was not true (${{ github.event.inputs.deploy }}).  The following deploy command was not run:"
@@ -156,7 +157,8 @@ jobs:
           $version = $packageName.TrimStart('NewRelic.Agent.Api').TrimStart('.').TrimEnd('.nupkg')
           if ("${{ github.event.inputs.deploy }}" -eq "true") {
             Write-Host "Should not be here"
-            nuget.exe push $packagePath -Source ${{ env.nuget_source }}
+            Write-Host "nuget.exe push $packagePath -Source ${{ env.nuget_source }}"
+            #nuget.exe push $packagePath -Source ${{ env.nuget_source }}
           }
           else {
             Write-Host "Input:deploy was not true (${{ github.event.inputs.deploy }}).  The following deploy command was not run:"
@@ -171,7 +173,8 @@ jobs:
           $version = $packageName.TrimStart('NewRelicWindowsAzure').TrimStart('.').TrimEnd('.nupkg')
           if ("${{ github.event.inputs.deploy }}" -eq "true") {
             Write-Host "Should not be here"
-            nuget.exe push $packagePath -Source ${{ env.nuget_source }}
+            Write-Host "nuget.exe push $packagePath -Source ${{ env.nuget_source }}"
+            #nuget.exe push $packagePath -Source ${{ env.nuget_source }}
           }
           else {
             Write-Host "Input:deploy was not true (${{ github.event.inputs.deploy }}).  The following deploy command was not run:"
@@ -186,7 +189,8 @@ jobs:
           $version = $packageName.TrimStart('NewRelic.Azure.WebSites.x').TrimStart('.').TrimEnd('.nupkg')
           if ("${{ github.event.inputs.deploy }}" -eq "true") {
             Write-Host "Should not be here"
-            nuget.exe push $packagePath -Source ${{ env.nuget_source }}
+            Write-Host "nuget.exe push $packagePath -Source ${{ env.nuget_source }}"
+            #nuget.exe push $packagePath -Source ${{ env.nuget_source }}
           }
           else {
             Write-Host "Input:deploy was not true (${{ github.event.inputs.deploy }}).  The following deploy command was not run:"
@@ -201,7 +205,8 @@ jobs:
           $version = $packageName.TrimStart('NewRelic.Azure.WebSites.x').TrimStart('.').TrimEnd('.nupkg')
           if ("${{ github.event.inputs.deploy }}" -eq "true") {
             Write-Host "Should not be here"
-            nuget.exe push $packagePath -Source ${{ env.nuget_source }}
+            Write-Host "nuget.exe push $packagePath -Source ${{ env.nuget_source }}"
+            #nuget.exe push $packagePath -Source ${{ env.nuget_source }}
           }
           else {
             Write-Host "Input:deploy was not true (${{ github.event.inputs.deploy }}).  The following deploy command was not run:"
