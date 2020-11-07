@@ -61,7 +61,7 @@ jobs:
 
   deploy-downloadsite:
     needs: get-external-artifacts
-    if: ${{ github.event.inputs.downloadsite == "true" }}
+    if: ${{ github.event.inputs.downloadsite == 'true' }}
     name: Deploy MSI and Scriptable to Download Site
     runs-on: windows-2019
 
@@ -115,7 +115,7 @@ jobs:
 
   deploy-nuget:
     needs: get-external-artifacts
-    if: ${{ github.event.inputs.nuget == "true" }}
+    if: ${{ github.event.inputs.nuget == 'true' }}
     name: Deploy Agent to NuGet
     runs-on: windows-2019
 
@@ -216,7 +216,7 @@ jobs:
 
   deploy-linux:
     needs: get-external-artifacts
-    if: ${{ github.event.inputs.linux == "true" }}
+    if: ${{ github.event.inputs.linux == 'true' }}
     name: Deploy Linux to APT and YUM
     runs-on: ubuntu-latest
     steps:
