@@ -241,7 +241,6 @@ jobs:
 
       - name: Move Artifacts an GPG Key to Staging Location
         run: |
-          ls -la
           cp LinuxRpm/*.rpm ${{ github.workspace }}/deploy/linux/packages
           cp LinuxDeb/*.deb ${{ github.workspace }}/deploy/linux/packages
           cp -f ${{ steps.write_gpgkey.outputs.filePath }} ${{ github.workspace }}/deploy/linux/deploy_scripts/gpg.tar.bz2
@@ -255,7 +254,7 @@ jobs:
           if [ $agent_version_count -lt 3 ] || [ $agent_version_count -gt 4 ] ; then
             echo "::error Supplied agent version from Workflow (${{ github.event.inputs.agent_version }}) is malformed.  It needs to be like 8.29.0 or 8.29.0.0"
             exit 1
-          elif[ $agent_version_count -eq 4 ] ; then
+          elif [ $agent_version_count -eq 4 ] ; then
             AGENT_VERSION=${{ github.event.inputs.agent_version }}
           else
             AGENT_VERSION=${{ github.event.inputs.agent_version }}.0
