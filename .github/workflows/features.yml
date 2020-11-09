@@ -21,6 +21,8 @@ jobs:
         run: |
           echo "::set-output name=action_fruit::strawberry"
           echo "woo=cool" >> $GITHUB_ENV
+          echo "======================================"
+          echo "$GITHUB_ENV"
         shell: bash
         id: fruit
       
@@ -38,11 +40,13 @@ jobs:
         run: |
           Write-Host "::set-output name=action_fruit::strawberry"
           Write-Host "woo=cool" >> $GITHUB_ENV
+          Write-Host "======================================"
+          Write-Host "${GITHUB_ENV} OR ${env:GITHUB_ENV}"
         shell: powershell
         id: fruit
       
       - name: get output
         run: |
           Write-Host "${{ steps.fruit.outputs.action_fruit }}"
-          Write-Host "$woo"
+          Write-Host "${woo}"
         shell: powershell
