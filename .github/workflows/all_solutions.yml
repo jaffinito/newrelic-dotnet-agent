@@ -110,7 +110,7 @@ jobs:
       - name: Get Profiler Hash
         id: linux-profiler-hash
         run: |
-          echo "::set-output name=prof_hash::${{ hashFiles('src\Agent\NewRelic\Profiler') }}"
+          echo "::set-output name=prof_hash::${{ hashFiles('src/Agent/NewRelic/Profiler') }}"
         shell: bash
 
       - name: Clean out _profilerBuild directory
