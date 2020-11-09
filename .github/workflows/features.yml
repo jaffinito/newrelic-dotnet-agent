@@ -23,6 +23,8 @@ jobs:
           echo "woo=cool" >> $GITHUB_ENV
           echo "======================================"
           echo "$GITHUB_ENV"
+          echo "======================================"
+          cat "$GITHUB_ENV"
         shell: bash
         id: fruit
       
@@ -39,9 +41,11 @@ jobs:
       - name: set output
         run: |
           Write-Host "::set-output name=action_fruit::strawberry"
-          Write-Host "woo=cool" >> $GITHUB_ENV
+          Write-Host "woo=cool" >> ${env:GITHUB_ENV}
           Write-Host "======================================"
-          Write-Host "${GITHUB_ENV} OR ${env:GITHUB_ENV}"
+          Write-Host "${env:GITHUB_ENV}"
+          Write-Host "======================================"
+          Get-Content ${env:GITHUB_ENV}
         shell: powershell
         id: fruit
       
