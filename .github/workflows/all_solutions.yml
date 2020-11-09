@@ -23,39 +23,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  md5-profiler:
-    needs: cancel-previous-workflow-runs
-    if: ${{ always() }}
-    name: Get MD5 Hash of Profiler Directory
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Install checksumdir
-        run: |
-          pip install wheel
-          pip install checksumdir
-        shell: bash
-
-      - name: MD5 Profiler
-        run: |
-          PATH=$PATH:~/.local/bin
-          profsum=$(checksumdir -a md5 ${{ env.profiler_path }})
-          echo "profiler_md5=$profsum" >> $GITHUB_ENV
-        shell: bash 
-
   build-windows-profiler:
-    needs: md5-profiler
+    needs: cancel-previous-workflow-runs
     if: ${{ always() }}
     name: Build Windows Profiler
     runs-on: windows-2019
 
     env:
-      profiler_path: ${{ github.workspace }}\src\Agent\NewRelic\Profiler
       profiler_solution_path: ${{ github.workspace }}\src\Agent\NewRelic\Profiler\NewRelic.Profiler.sln
       output_path: ${{ github.workspace }}\src\Agent\_profilerBuild
 
@@ -67,6 +41,12 @@ jobs:
 
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.1
+
+      - name: Get Profiler Hash
+        id: windows-profiler-hash
+        run: |
+          Write-Host "::set-output name=prof_hash::${{ hashFiles('src\Agent\NewRelic\Profiler') }}"
+        shell: powershell
 
       - name: Clean out _profilerBuild directory
         run: |
@@ -81,21 +61,24 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ github.workspace }}/src/Agent/_profilerBuild/**/*
-          key: windows-profiler-${{ env.profiler_md5 }}
+          key: windows-profiler-${{ steps.windows-profiler-hash.outputs.prof_hash }}
 
       - name: Install dependencies
+        if: steps.cache-profiler-win.outputs.cache-hit != 'true'
         run: |
           Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.profiler_solution_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
           ${{ env.tools_path }}\nuget.exe restore ${{ env.profiler_solution_path }} -NoCache -Source "https://www.nuget.org/api/v2"
         shell: powershell
 
       - name: Build x64
+        if: steps.cache-profiler-win.outputs.cache-hit != 'true'
         run: |
           Write-Host "MSBuild.exe -m -p:Platform=x64 -p:Configuration=Release ${{ env.profiler_solution_path }}"
           MSBuild.exe -m -p:Platform=x64 -p:Configuration=Release ${{ env.profiler_solution_path }}
         shell: powershell
         
       - name: Build x86
+        if: steps.cache-profiler-win.outputs.cache-hit != 'true'
         run: |
           Write-Host "MSBuild.exe -m -p:Platform=Win32 -p:Configuration=Release ${{ env.profiler_solution_path }}"
           MSBuild.exe -m -p:Platform=Win32 -p:Configuration=Release ${{ env.profiler_solution_path }}
@@ -109,7 +92,7 @@ jobs:
           if-no-files-found: error
 
   build-linux-profiler:
-    needs: md5-profiler
+    needs: cancel-previous-workflow-runs
     if: ${{ always() }}
     name: Build Linux Profiler
     runs-on: ubuntu-18.04
@@ -124,6 +107,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Get Profiler Hash
+        id: linux-profiler-hash
+        run: |
+          echo "::set-output name=prof_hash::${{ hashFiles('src\Agent\NewRelic\Profiler') }}"
+        shell: bash
+
       - name: Clean out _profilerBuild directory
         run: |
           rm -f ${{ github.workspace }}/src/Agent/_profilerBuild/*.*
@@ -137,9 +126,10 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ github.workspace }}/src/Agent/_profilerBuild/**/*
-          key: linux-profiler-${{ env.profiler_md5 }}
+          key: linux-profiler-${{ steps.linux-profiler-hash.outputs.prof_hash }
 
       - name: Build Linux Profler
+        if: steps.cache-profiler-lin.outputs.cache-hit != 'true'
         run: |
           cd ${{ env.profiler_path }}
           docker-compose build build
@@ -147,6 +137,7 @@ jobs:
         shell: bash
 
       - name: Move Profiler to staging folder
+        if: steps.cache-profiler-lin.outputs.cache-hit != 'true'
         run: |
           mkdir --parents ${{ github.workspace }}/src/Agent/_profilerBuild/linux-release/
           mv -f ${{ env.profiler_path }}/libNewRelicProfiler.so  ${{ github.workspace }}/src/Agent/_profilerBuild/linux-release/libNewRelicProfiler.so
