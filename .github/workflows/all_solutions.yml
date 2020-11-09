@@ -126,7 +126,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ github.workspace }}/src/Agent/_profilerBuild/**/*
-          key: linux-profiler-${{ steps.linux-profiler-hash.outputs.prof_hash }
+          key: linux-profiler-${{ steps.linux-profiler-hash.outputs.prof_hash }}
 
       - name: Build Linux Profler
         if: steps.cache-profiler-lin.outputs.cache-hit != 'true'
