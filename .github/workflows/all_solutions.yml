@@ -15,17 +15,7 @@ env:
 
 jobs:
 
-  github-runid:
-    name: Get the GitHub Workflow Run ID
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run ID
-        run: |
-          echo "${{ github.run_id }}"
-        shell: bash
-
   cancel-previous-workflow-runs:
-    needs: github-runid
     name: Cancel Previous Runs
     runs-on: ubuntu-latest
     steps:
@@ -33,8 +23,139 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  md5-profiler:
+    needs: cancel-previous-workflow-runs
+    if: ${{ always() }}
+    name: Get MD5 Hash of Profiler Directory
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: MD5 Profiler
+        run: |
+          pip install checksumdir
+          profsum=$(checksumdir -a md5 ${{ env.profiler_path }})
+          echo "profiler_md5=$profsum" >> $GITHUB_ENV
+        shell: bash 
+
+  build-windows-profiler:
+    needs: md5-profiler
+    if: ${{ always() }}
+    name: Build Windows Profiler
+    runs-on: windows-2019
+
+    env:
+      profiler_path: ${{ github.workspace }}\src\Agent\NewRelic\Profiler
+      profiler_solution_path: ${{ github.workspace }}\src\Agent\NewRelic\Profiler\NewRelic.Profiler.sln
+      output_path: ${{ github.workspace }}\src\Agent\_profilerBuild
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.1
+
+      - name: Clean out _profilerBuild directory
+        run: |
+          Remove-Item -Path "${{ github.workspace }}\src\Agent\_profilerBuild\*.*" -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path "${{ github.workspace }}\src\Agent\_profilerBuild\x64-Release" -Recurse -Force  -ErrorAction SilentlyContinue
+          Remove-Item -Path "${{ github.workspace }}\src\Agent\_profilerBuild\x86-Release" -Recurse -Force  -ErrorAction SilentlyContinue
+          Remove-Item -Path "${{ github.workspace }}\src\Agent\_profilerBuild\linux-release" -Recurse -Force  -ErrorAction SilentlyContinue
+        shell: powershell
+
+      - name: Cache Profiler
+        id: cache-profiler-win
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/src/Agent/_profilerBuild/**/*
+          key: windows-profiler-${{ env.profiler_md5 }}
+
+      - name: Install dependencies
+        run: |
+          Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.profiler_solution_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
+          ${{ env.tools_path }}\nuget.exe restore ${{ env.profiler_solution_path }} -NoCache -Source "https://www.nuget.org/api/v2"
+        shell: powershell
+
+      - name: Build x64
+        run: |
+          Write-Host "MSBuild.exe -m -p:Platform=x64 -p:Configuration=Release ${{ env.profiler_solution_path }}"
+          MSBuild.exe -m -p:Platform=x64 -p:Configuration=Release ${{ env.profiler_solution_path }}
+        shell: powershell
+        
+      - name: Build x86
+        run: |
+          Write-Host "MSBuild.exe -m -p:Platform=Win32 -p:Configuration=Release ${{ env.profiler_solution_path }}"
+          MSBuild.exe -m -p:Platform=Win32 -p:Configuration=Release ${{ env.profiler_solution_path }}
+        shell: powershell
+
+      - name: Archive Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: profiler
+          path: ${{ github.workspace }}\src\Agent\_profilerBuild\**\*
+          if-no-files-found: error
+
+  build-linux-profiler:
+    needs: md5-profiler
+    if: ${{ always() }}
+    name: Build Linux Profiler
+    runs-on: ubuntu-18.04
+
+    env:
+      profiler_path: ${{ github.workspace }}/src/Agent/NewRelic/Profiler
+      #<other env vars here>
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Clean out _profilerBuild directory
+        run: |
+          rm -f ${{ github.workspace }}/src/Agent/_profilerBuild/*.*
+          rm -rf ${{ github.workspace }}/src/Agent/_profilerBuild/linux-release
+          rm -rf ${{ github.workspace }}/src/Agent/_profilerBuild/x64-Release
+          rm -rf ${{ github.workspace }}/src/Agent/_profilerBuild/x86-Release
+        shell: bash
+
+      - name: Cache Profiler
+        id: cache-profiler-lin
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/src/Agent/_profilerBuild/**/*
+          key: linux-profiler-${{ env.profiler_md5 }}
+
+      - name: Build Linux Profler
+        run: |
+          cd ${{ env.profiler_path }}
+          docker-compose build build
+          docker-compose run build
+        shell: bash
+
+      - name: Move Profiler to staging folder
+        run: |
+          mkdir --parents ${{ github.workspace }}/src/Agent/_profilerBuild/linux-release/
+          mv -f ${{ env.profiler_path }}/libNewRelicProfiler.so  ${{ github.workspace }}/src/Agent/_profilerBuild/linux-release/libNewRelicProfiler.so
+        shell: bash
+
+      - name: Archive Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: profiler
+          path: ${{ github.workspace }}/src/Agent/_profilerBuild/
+          if-no-files-found: error
+
   # This builds both FullAgent and MSIInstaller since MSIInstaller requires FullAgent artifacts.
   build-test-fullagent-msi:
+    needs: [ build-windows-profiler, build-linux-profiler ]
     name: Build and Test FullAgent and MSIInstaller
     runs-on: windows-2019
 
@@ -53,7 +174,21 @@ jobs:
 
       - name: Setup VSTest Path
         uses: darenm/Setup-VSTest@v1
-     
+
+      - name: Clean out _profilerBuild directory
+        run: |
+          Remove-Item -Path "${{ github.workspace }}\src\Agent\_profilerBuild\*.*" -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path "${{ github.workspace }}\src\Agent\_profilerBuild\x64-Release" -Recurse -Force  -ErrorAction SilentlyContinue
+          Remove-Item -Path "${{ github.workspace }}\src\Agent\_profilerBuild\x86-Release" -Recurse -Force  -ErrorAction SilentlyContinue
+          Remove-Item -Path "${{ github.workspace }}\src\Agent\_profilerBuild\linux-release" -Recurse -Force  -ErrorAction SilentlyContinue
+        shell: powershell
+
+      - name: Download Profiler Artifacts Before Agent Build
+        uses: actions/download-artifact@v2
+        with:
+          name: profiler
+          path: ${{ github.workspace }}/src/Agent/_profilerBuild/
+      
       - name: Install dependencies for FullAgent.sln
         run: |
           Write-Host ${{ env.tools_path }}\nuget.exe restore ${{ env.fullagent_solution_path }} -NoCache -Source `"https://www.nuget.org/api/v2`"
@@ -148,169 +283,4 @@ jobs:
         with:
           name: NewRelic.OpenTracing.AmazonLambda.Tracer
           path: ${{ github.workspace }}\src\AwsLambda\AwsLambdaOpenTracer\bin\Release\netstandard2.0-ILRepacked
-          if-no-files-found: error
-
-  create-package-rpm:
-    needs: build-test-fullagent-msi
-    if: ${{ github.event.release }}
-    name: Create RPM Package
-    runs-on: ubuntu-18.04
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      
-      - name: Download _build Artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: build-folder-artifacts
-          path: src/_build
-
-      - name: Download Agent Home Folders
-        uses: actions/download-artifact@v2
-        with:
-          name: homefolders
-          path: src/Agent
-      
-      - name: Download Agent Version
-        uses: actions/download-artifact@v2
-        with:
-          name: agent-version
-          path: ${{ github.workspace }}
-
-      - name: Get GPG Key
-        id: write_gpgkey
-        uses: timheuer/base64-to-file@v1
-        with:
-          fileName: 'gpg.tar.bz2'
-          encodedString: ${{ secrets.GPG_KEY }}
-
-      - name: Copy GPG Key to keys
-        run: |
-          mkdir ${{ github.workspace }}/build/Linux/keys
-          cp -f ${{ steps.write_gpgkey.outputs.filePath }} ${{ github.workspace }}/build/Linux/keys/gpg.tar.bz2
-        shell: bash
-
-      - name: Build RPM
-        run: |
-          sudo apt install dos2unix -y
-          dos2unix ${{ github.workspace }}/agent_version.txt
-          agentVersion=$(head -n 1 ${{ github.workspace }}/agent_version.txt)
-          agentVersion=${agentVersion/$'\r\n\t'}
-          cd ${{ github.workspace }}/build/Linux
-          docker-compose build build_rpm
-          docker-compose run -e AGENT_VERSION=$agentVersion -e GPG_KEYS=/keys/gpg.tar.bz2 build_rpm
-        shell: bash
-      
-      - name: Archive Package Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: build-folder-artifacts
-          path: ${{ github.workspace }}/src/_build
-          if-no-files-found: error
-
-  create-package-deb:
-    needs: build-test-fullagent-msi
-    if: ${{ github.event.release }}
-    name: Create Debian package
-    runs-on: ubuntu-18.04
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-        
-      - name: Download Agent Home Folders
-        uses: actions/download-artifact@v2
-        with:
-          name: homefolders
-          path: src/Agent
-
-      - name: Download _build Artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: build-folder-artifacts
-          path: src/_build
-
-      - name: Download agent_version.txt
-        uses: actions/download-artifact@v2
-        with:
-          name: agent-version
-          path: ${{ github.workspace }}
-
-      - name: Build debian package
-        run: |
-          sudo apt install dos2unix -y
-          dos2unix ${{ github.workspace }}/agent_version.txt
-          agentVersion=$(head -n 1 ${{ github.workspace }}/agent_version.txt)
-          agentVersion=${agentVersion/$'\r\n\t'}
-          cd ${{ github.workspace }}/build/Linux
-          docker-compose build build_deb
-          docker-compose run -e AGENT_VERSION=$agentVersion build_deb
-        shell: bash
-        
-      - name: Archive Package Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: build-folder-artifacts
-          path: ${{ github.workspace }}/src/_build
-          if-no-files-found: error
-
-  run-artifactbuilder:
-    needs: [ create-package-rpm, create-package-deb ]
-    if: ${{ github.event.release }}
-    name: Run ArtifactBuilder
-    runs-on: windows-2019
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Download Agent Home Folders
-        uses: actions/download-artifact@v2
-        with:
-          name: homefolders
-          path: src/Agent 
-      
-      - name: Download _build Artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: build-folder-artifacts
-          path: src/_build
-
-      - name: Download NewRelic.NuGetHelper
-        uses: actions/download-artifact@v2
-        with:
-          name: NewRelic.NuGetHelper
-          path: build/NewRelic.NuGetHelper/bin
-      
-      - name: Download NewRelic.Agent.Extensions
-        uses: actions/download-artifact@v2
-        with:
-          name: NewRelic.Agent.Extensions
-          path: src/Agent/NewRelic/Agent/Extensions/NewRelic.Agent.Extensions/bin/Release
-
-      - name: Download NewRelic.OpenTracing.AmazonLambda.Tracer
-        uses: actions/download-artifact@v2
-        with:
-          name: NewRelic.OpenTracing.AmazonLambda.Tracer
-          path: src/AwsLambda/AwsLambdaOpenTracer/bin/Release/netstandard2.0-ILRepacked
-
-      - name: Run ArtifactBuilder
-        run: |
-          ${{ github.workspace }}\build\package.ps1 -configuration Release -IncludeDownloadSite
-        shell: powershell
-
-      - name: Archive Deploy Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: deploy-artifacts
-          path: |
-            ${{ github.workspace }}\build\BuildArtifacts
-            ${{ github.workspace }}\deploy
           if-no-files-found: error
