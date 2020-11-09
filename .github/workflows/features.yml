@@ -42,11 +42,11 @@ jobs:
         run: |
           Write-Host "::set-output name=action_fruit::strawberry"
           #Write-Host "woo=cool" >> ${env:GITHUB_ENV}
-          Write-Host "woo=cool" | Add-Content -Path "${env:GITHUB_ENV}"
+          "woo=cool" | Add-Content -Path "${env:GITHUB_ENV}"
           Write-Host "======================================"
           Write-Host "${env:GITHUB_ENV}"
           Write-Host "======================================"
-          Get-Content "${env:GITHUB_ENV}"
+          Get-Content ">${env:GITHUB_ENV}"
         shell: powershell
         id: fruit
       
