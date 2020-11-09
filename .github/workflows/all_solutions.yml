@@ -39,15 +39,11 @@ jobs:
         run: |
           pip install wheel
           pip install checksumdir
-          echo "=========================================="
-          ls -la ~/.local/bin/
-          echo "=========================================="
-          echo $PATH
-          echo "=========================================="
         shell: bash
 
       - name: MD5 Profiler
         run: |
+          PATH=$PATH:~/.local/bin/
           profsum=$(checksumdir -a md5 ${{ env.profiler_path }})
           echo "profiler_md5=$profsum" >> $GITHUB_ENV
         shell: bash 
