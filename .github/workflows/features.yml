@@ -37,7 +37,7 @@ jobs:
       - name: set output
         run: |
           Write-Host "::set-output name=action_fruit::strawberry"
-          Write-Host "woo=cool" >> $env:GITHUB_ENV
+          Write-Host "woo=cool" >> $GITHUB_ENV
         shell: powershell
         id: fruit
       
