@@ -39,6 +39,11 @@ jobs:
         run: |
           pip install wheel
           pip install checksumdir
+          echo "=========================================="
+          ls -la ~/.local/bin/
+          echo "=========================================="
+          echo $PATH
+          echo "=========================================="
         shell: bash
 
       - name: MD5 Profiler
