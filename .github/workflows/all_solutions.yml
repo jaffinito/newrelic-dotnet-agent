@@ -35,10 +35,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: MD5 Profiler
+      - name: Install checksumdir
         run: |
           pip install wheel
           pip install checksumdir
+        shell: bash
+
+      - name: MD5 Profiler
+        run: |
           profsum=$(checksumdir -a md5 ${{ env.profiler_path }})
           echo "profiler_md5=$profsum" >> $GITHUB_ENV
         shell: bash 
