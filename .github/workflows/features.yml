@@ -31,6 +31,8 @@ jobs:
       
       - name: get output
         run: |
+          echo "$GITHUB_ENV"
+          echo "======================================"
           echo "${{ steps.fruit.outputs.action_fruit }}"
           echo "$woo"
         shell: bash
