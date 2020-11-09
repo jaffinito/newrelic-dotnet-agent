@@ -6,6 +6,9 @@ name: featuretesting
 # events but only for the main branch
 on:
   workflow_dispatch:
+
+env:
+  stuff: "nope"
    
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -14,7 +17,13 @@ jobs:
     name: Get the GitHub Workflow Run ID
     runs-on: ubuntu-latest
     steps:
-      - name: Run ID
+      - name: set output
         run: |
-          echo "${{ github.run_id }}"
+          echo "::set-output name=action_fruit::strawberry"
+        shell: bash
+        id: fruit
+      
+      - name: get output
+        run: |
+          echo "${{ steps.fruit.outputs.action_fruit }}"
         shell: bash
