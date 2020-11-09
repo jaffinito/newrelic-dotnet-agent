@@ -20,10 +20,12 @@ jobs:
       - name: set output
         run: |
           echo "::set-output name=action_fruit::strawberry"
+          echo "woo=cool" >> $GITHUB_ENV
         shell: bash
         id: fruit
       
       - name: get output
         run: |
           echo "${{ steps.fruit.outputs.action_fruit }}"
+          echo "$woo"
         shell: bash
