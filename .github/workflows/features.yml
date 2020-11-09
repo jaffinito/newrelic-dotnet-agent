@@ -46,7 +46,9 @@ jobs:
           Write-Host "======================================"
           Write-Host "${env:GITHUB_ENV}"
           Write-Host "======================================"
-          Get-Content ">${env:GITHUB_ENV}"
+          Get-Content "${env:GITHUB_ENV}"
+          Write-Host "======================================"
+          Copy-item -Path "${env:GITHUB_ENV}" -Destination .\
         shell: powershell
         id: fruit
       
