@@ -13,8 +13,8 @@ env:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  github-runid:
-    name: Get the GitHub Workflow Run ID
+  vars-linux:
+    name: Linux
     runs-on: ubuntu-latest
     steps:
       - name: set output
@@ -29,3 +29,20 @@ jobs:
           echo "${{ steps.fruit.outputs.action_fruit }}"
           echo "$woo"
         shell: bash
+
+  vars-windows:
+    name: Windows
+    runs-on: windows-2019
+    steps:
+      - name: set output
+        run: |
+          Write-Host "::set-output name=action_fruit::strawberry"
+          Write-Host "woo=cool" >> $env:GITHUB_ENV
+        shell: powershell
+        id: fruit
+      
+      - name: get output
+        run: |
+          Write-Host "${{ steps.fruit.outputs.action_fruit }}"
+          Write-Host "$woo"
+        shell: powershell
