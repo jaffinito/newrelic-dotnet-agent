@@ -35,46 +35,10 @@ jobs:
         id: fruit
       
       - name: get output
+        if: steps.cache-profiler.outputs.cache-hit != 'true'
         run: |
           echo "$GITHUB_ENV"
           echo "======================================"
           echo "${{ steps.fruit.outputs.action_fruit }}"
           echo "$woo"
         shell: bash
-
-  vars-windows:
-    name: Windows
-    runs-on: windows-2019
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      
-      - name: set output
-        run: |
-          Write-Host "::set-output name=action_fruit::strawberry"
-          "woo=cool" | Add-Content -Path "${env:GITHUB_ENV}"
-          Write-Host "======================================"
-          Write-Host "${env:GITHUB_ENV}"
-          Write-Host "======================================"
-          Get-Content "${env:GITHUB_ENV}"
-          Get-Content "${env:GITHUB_ENV}"
-          Get-Content "${env:GITHUB_ENV}"
-          Get-Content "${env:GITHUB_ENV}"
-          Write-Host "======================================"
-        shell: powershell
-        id: fruit
-      
-      - name: get output
-        run: |
-          Write-Host "${env:GITHUB_ENV}"
-          Write-Host "======================================"
-          Get-Content "${env:GITHUB_ENV}"
-          Get-Content "${env:GITHUB_ENV}"
-          Get-Content "${env:GITHUB_ENV}"
-          Get-Content "${env:GITHUB_ENV}"
-          Write-Host "======================================"
-          Write-Host "${{ steps.fruit.outputs.action_fruit }}"
-          Write-Host "${woo}"
-        shell: powershell
