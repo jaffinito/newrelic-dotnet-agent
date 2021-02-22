@@ -1,0 +1,23 @@
+name: start a release of aws
+
+on:
+  workflow_dispatch:
+    inputs:
+      agent_version:
+        description: 'AWS Version to deploy.'
+        required: true
+
+jobs:
+  start-lambda-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      # Runs a single command using the runners shell
+      - name: Create and push tag
+        run: |
+          git tag -a AwsLambdaOpenTracer_v${{ github.event.inputs.agent_version }} -m "AwsLambdaOpenTracer_v${{ github.event.inputs.agent_version }}"
+          git push origin AwsLambdaOpenTracer_v${{ github.event.inputs.agent_version }}
