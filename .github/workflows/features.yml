@@ -6,6 +6,10 @@ name: featuretesting
 # events but only for the main branch
 on:
   workflow_dispatch:
+  release:
+    types: [ published ]
+    tags:
+      - '*'
 
 env:
   stuff: "nope"
@@ -31,14 +35,4 @@ jobs:
           echo "======================================"
           cat "$GITHUB_ENV"
           echo "======================================"
-        shell: bash
-        id: fruit
-      
-      - name: get output
-        if: steps.cache-profiler.outputs.cache-hit != 'true'
-        run: |
-          echo "$GITHUB_ENV"
-          echo "======================================"
-          echo "${{ steps.fruit.outputs.action_fruit }}"
-          echo "$woo"
         shell: bash
