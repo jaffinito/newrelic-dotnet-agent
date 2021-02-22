@@ -28,4 +28,3 @@ jobs:
               ref: "refs/tags/AwsLambdaOpenTracer_v${{ github.event.inputs.agent_version }}",
               sha: context.sha
             })
-          debug: true
