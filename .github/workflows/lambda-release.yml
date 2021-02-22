@@ -28,7 +28,4 @@ jobs:
               ref: "refs/tags/AwsLambdaOpenTracer_v${{ github.event.inputs.agent_version }}",
               sha: context.sha
             })
-          result-encoding: string
-          
-      - name: Get result
-        run: echo "${{steps.set-result.outputs.result}}"
+          debug: true
