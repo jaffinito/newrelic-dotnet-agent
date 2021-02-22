@@ -6,10 +6,9 @@ name: featuretesting
 # events but only for the main branch
 on:
   workflow_dispatch:
-  release:
-    types: [ published ]
+  push:
     tags:
-      - 'v*'
+      - 'aws_*'
 
 env:
   stuff: "nope"
