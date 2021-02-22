@@ -16,15 +16,14 @@ jobs:
         with:
           fetch-depth: 0
           
-      - uses: actions/github-script@v3
+      - name: Create tag
+        uses: actions/github-script@v3
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ github.token }}
           script: |
-            github.git.createTag({
+            github.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag: "AwsLambdaOpenTracer_v${{ github.event.inputs.agent_version }}",
-              message: "stuff",
-              object: "${{ github.sha }}",
-              type: "commit",
-            });
+              ref: "refs/tags/AwsLambdaOpenTracer_v${{ github.event.inputs.agent_version }}",
+              sha: context.sha
+            })
