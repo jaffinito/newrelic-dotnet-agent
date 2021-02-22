@@ -26,5 +26,5 @@ jobs:
               tag: "AwsLambdaOpenTracer_v${{ github.event.inputs.agent_version }}",
               message: "stuff",
               object: "${{ github.sha }}",
-              type: commit,
+              type: "commit",
             });
