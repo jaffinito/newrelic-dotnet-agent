@@ -18,6 +18,7 @@ jobs:
           
       - name: Create tag
         uses: actions/github-script@v3
+        id: set-result
         with:
           github-token: ${{ github.token }}
           script: |
@@ -27,3 +28,7 @@ jobs:
               ref: "refs/tags/AwsLambdaOpenTracer_v${{ github.event.inputs.agent_version }}",
               sha: context.sha
             })
+          result-encoding: string
+          
+      - name: Get result
+        run: echo "${{steps.set-result.outputs.result}}"
