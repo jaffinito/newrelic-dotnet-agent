@@ -16,15 +16,9 @@ jobs:
         with:
           fetch-depth: 0
           
-      - name: Create tag
-        uses: actions/github-script@v3
-        id: set-result
-        with:
-          github-token: ${{ github.token }}
-          script: |
-            github.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: "refs/tags/AwsLambdaOpenTracer_v${{ github.event.inputs.agent_version }}",
-              sha: context.sha
-            })
+      - name: Create and push tag
+        run: |
+          git config --local user.email "noreply@newrelic.com"
+          git config --local user.name "dotnetteam[bot]"
+          git tag -a AwsLambdaOpenTracer_v${{ github.event.inputs.agent_version }} -m "AwsLambdaOpenTracer_v${{ github.event.inputs.agent_version }}"
+          git push origin AwsLambdaOpenTracer_v${{ github.event.inputs.agent_version }}
