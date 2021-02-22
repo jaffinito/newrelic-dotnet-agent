@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - 'aws_*'
+      - 'AwsLambdaOpenTracer_v*'
 
 env:
   stuff: "nope"
