@@ -9,7 +9,7 @@ on:
   release:
     types: [ published ]
     tags:
-      - '*'
+      - 'v*'
 
 env:
   stuff: "nope"
