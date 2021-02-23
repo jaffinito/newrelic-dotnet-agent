@@ -8,6 +8,14 @@ on:
         required: true
 
 jobs:
+  cancel-previous-workflow-runs:
+    name: Cancel Previous Runs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: rokroskar/workflow-run-cleanup-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   start-lambda-release:
     runs-on: ubuntu-latest
     steps:
@@ -18,7 +26,4 @@ jobs:
           
       - name: Create and push tag
         run: |
-          git config --local user.email "noreply@newrelic.com"
-          git config --local user.name "dotnetteam[bot]"
-          git tag -a AwsLambdaOpenTracer_v${{ github.event.inputs.agent_version }} -m "AwsLambdaOpenTracer_v${{ github.event.inputs.agent_version }}"
-          git push origin AwsLambdaOpenTracer_v${{ github.event.inputs.agent_version }}
+          echo "go go lambda"
