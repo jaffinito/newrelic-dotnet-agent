@@ -1,0 +1,37 @@
+# This is a basic workflow to help you get started with Actions
+
+name: featuretesting
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the main branch
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'AwsLambdaOpenTracer_v*'
+
+env:
+  stuff: "nope"
+   
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  vars-linux:
+    name: Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          
+      - name: set output
+        run: |
+          echo "::set-output name=action_fruit::strawberry"
+          echo "woo=cool" >> $GITHUB_ENV
+          echo "======================================"
+          echo "$GITHUB_ENV"
+          echo "======================================"
+          cat "$GITHUB_ENV"
+          echo "======================================"
+        shell: bash

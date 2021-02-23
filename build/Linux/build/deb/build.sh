@@ -36,6 +36,11 @@ cp /docs/netcore20-agent-readme.md ./README.md
 
 dos2unix *.x* extensions/*.x* *.sh
 
+echo "=========================="
+ls -la /deb
+echo "=========================="
+
+
 cp /deb/control ${INSTALL_ROOT}/DEBIAN
 cp /deb/postinst ${INSTALL_ROOT}/DEBIAN
 cp /deb/conffiles ${INSTALL_ROOT}/DEBIAN
@@ -58,3 +63,7 @@ cp /common/agentinfo.json .
 
 # create tar ball
 tar cvfz /release/${PACKAGE_FILE_BASENAME}.tar.gz -C ${INSTALL_LOCATION} ..
+
+if [ $? -gt 0 ] ; then
+    echo "::error Docker run exited with code: $?"
+fi

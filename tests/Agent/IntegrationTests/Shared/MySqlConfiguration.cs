@@ -3,6 +3,7 @@
 
 
 using System;
+using System.Data.Common;
 
 namespace NewRelic.Agent.IntegrationTests.Shared
 {
@@ -11,6 +12,7 @@ namespace NewRelic.Agent.IntegrationTests.Shared
         private static string _mySqlConnectionString;
         private static string _mySqlServer;
         private static string _mySqlPort;
+        private static string _mySqlDbName;
 
         // example: "Network Address=1.2.3.4;Port=4444;Initial Catalog=CatalogName;Persist Security Info=no;User Name=root;Password=password"
         public static string MySqlConnectionString
@@ -42,9 +44,8 @@ namespace NewRelic.Agent.IntegrationTests.Shared
                 {
                     try
                     {
-                        var subParts = MySqlConnectionString.Split(';');
-                        var index = subParts[0].IndexOf('=') + 1;
-                        _mySqlServer = subParts[0].Substring(index);
+                        var builder = new DbConnectionStringBuilder { ConnectionString = MySqlConnectionString };
+                        _mySqlServer = builder["Network Address"].ToString();
                     }
                     catch (Exception ex)
                     {
@@ -64,9 +65,8 @@ namespace NewRelic.Agent.IntegrationTests.Shared
                 {
                     try
                     {
-                        var subParts = MySqlConnectionString.Split(';');
-                        var index = subParts[1].IndexOf('=') + 1;
-                        _mySqlPort = subParts[1].Substring(index);
+                        var builder = new DbConnectionStringBuilder { ConnectionString = MySqlConnectionString };
+                        _mySqlPort = builder["Port"].ToString();
                     }
                     catch (Exception ex)
                     {
@@ -77,5 +77,27 @@ namespace NewRelic.Agent.IntegrationTests.Shared
                 return _mySqlPort;
             }
         }
+
+        public static string MySqlDbName
+        {
+            get
+            {
+                if (_mySqlDbName == null)
+                {
+                    try
+                    {
+                        var builder = new DbConnectionStringBuilder { ConnectionString = MySqlConnectionString };
+                        _mySqlDbName = builder["Initial Catalog"].ToString();
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("MySqlDbName configuration is invalid.", ex);
+                    }
+                }
+
+                return _mySqlDbName;
+            }
+        }
+
     }
 }

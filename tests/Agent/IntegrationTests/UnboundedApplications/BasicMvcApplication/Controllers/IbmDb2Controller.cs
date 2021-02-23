@@ -1,7 +1,7 @@
-// // Copyright 2020 New Relic, Inc. All rights reserved.
-// // SPDX-License-Identifier: Apache-2.0
+// Copyright 2020 New Relic, Inc. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 
-
+// Tests have a dependency on IBM software that is behind login-locked walls.
 // using IBM.Data.DB2;
 // using NewRelic.Agent.IntegrationTests.Shared;
 // using System.Collections.Generic;
