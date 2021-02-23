@@ -16,6 +16,7 @@ env:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   cancel-previous-workflow-runs:
+    if: github.event_name == "release" && startsWith( github.ref, "refs/tags/AwsLambdaOpenTracer_v" )
     name: Cancel Previous Runs
     runs-on: ubuntu-latest
     steps:
@@ -24,6 +25,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
   vars-linux:
+    needs: cancel-previous-workflow-runs
     name: Linux
     runs-on: ubuntu-latest
     steps:
