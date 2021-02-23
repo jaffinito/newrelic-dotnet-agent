@@ -6,7 +6,7 @@ on:
 
 jobs:
   cancel-previous-workflow-runs: # github.ref == "refs/tags/<tag_name>"
-    if: github.event_name == release && startsWith( github.ref, refs/tags/AwsLambdaOpenTracer_v )
+    if: github.event_name == 'release' && startsWith( github.ref, 'refs/tags/AwsLambdaOpenTracer_v' )
     name: Cancel Previous Runs
     runs-on: ubuntu-latest
     steps:
