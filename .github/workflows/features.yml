@@ -6,9 +6,8 @@ name: featuretesting
 # events but only for the main branch
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - 'AwsLambdaOpenTracer_v*'
+  release:
+    types: [ published ]
 
 env:
   stuff: "nope"
@@ -16,6 +15,14 @@ env:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  cancel-previous-workflow-runs:
+    name: Cancel Previous Runs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: rokroskar/workflow-run-cleanup-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
   vars-linux:
     name: Linux
     runs-on: ubuntu-latest
